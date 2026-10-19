@@ -1,0 +1,10 @@
+# Funciones triviales que el fuzzer automatico no sabe preparar (indices leidos de memoria,
+# ctor/dtor con vtables...). Se decompilan a mano o con un caso propio en tests/difftest/cases.py.
+fn_8000E660
+fn_8001A850
+fn_8001A870
+fn_800AD930
+fn_80159850
+fn_80161380
+fn_801613E0
+MCommonYesNoDialogMenu_vf5

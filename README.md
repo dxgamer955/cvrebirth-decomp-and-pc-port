@@ -2,9 +2,9 @@
 
 > English | [Español](#espanol)
 
-> **Status: placeholder / work in progress.** This repository will host the readable, documented
-> decompilation of *Castlevania: The Adventure ReBirth* (WiiWare, 2009) and a native PC port built from it.
-> The source code will be published here once it is clean and documented enough to be useful to others.
+> **Status: work in progress.** This repository hosts the tools and the native runtime of a PC port of
+> *Castlevania: The Adventure ReBirth* (WiiWare, 2009), and the readable, documented decompilation that is being
+> written on top of it. The port runs the game up to Stage 1; see [BUILD.md](BUILD.md) to build it with your own copy of the game.
 
 ## What is this project?
 
@@ -18,9 +18,9 @@ developed by Konami / M2 for WiiWare. This project aims to:
 3. Document the game's engine, file formats (`.psb`, `.brsar`, `.brstm`...) and the Wii SDK pieces it uses, so the
    work can serve as a reference for similar projects.
 
-## Current state (private development)
+## Current state
 
-The work done so far lives outside this repository and is being cleaned up. Where it stands:
+Where it stands:
 
 - Done: The whole of `game.dol` is lifted to C++ and **runs natively on x86-64 Linux**, with no emulator:
   boot, threads, timers, file/NAND access, intro, title screen, map and Stage 1.
@@ -28,32 +28,36 @@ The work done so far lives outside this repository and is being cleaned up. Wher
   60 FPS in Stage 1.
 - Done: **Audio**: the real Wii audio SDK (AX / NW4R SND) running on top of a software DSP mixer,
   with SDL2 output (music and sound effects).
-- Done: Keyboard input (the game is played with the Wii Remote held sideways), in-game settings menu
+- Done: Keyboard and gamepad input (the game is played with the Wii Remote held sideways), in-game settings menu
   (VSync, frame limit, filters, resolution, fullscreen) and FPS counter.
 - Done: Saving works (emulated NAND in a local folder).
 - In progress: Replacing lifted machine code with readable, hand-written, documented C/C++ function by function.
-- In progress: Windows / macOS builds, gamepad support, Classic Controller / GameCube controller mapping.
+- Done: Windows build (MSYS2), stable 60 FPS in heavy scenes. The runtime also has a built-in sampling profiler.
+- In progress: macOS build, Classic Controller / GameCube controller mapping.
 - In progress: Remaining unlifted functions, renderer details and performance work.
 
-> Nothing in the list above is released yet. This README will be updated when the source is.
+About 1,100 of the roughly 6,300 unnamed functions have readable names so far (`decomp/game/config/renames.txt`).
 
-## Planned repository layout
+## Repository layout
 
 ```
-src/        Decompiled / ported game code (readable, documented)
-runtime/    Platform layer: SDL2 window + OpenGL renderer, audio mixer, input, file system
-tools/      Scripts used to extract data, split the binary and verify the decompilation
-docs/       Notes on the engine, file formats and the Wii SDK
+runtime/    Platform layer: SDL2 window + OpenGL renderer, audio mixer, input, file system, SDK replacements
+decomp/     Tools that translate game.dol to C++ (lifter), symbol tables, renames, Ghidra import script
+src/        Readable, hand-written decompiled game code (gameplay, engine)
+include/    Headers for the above
+scripts/    Helper scripts
+tests/      Differential tests for the translator
+BUILD.md    How to build and run (needs your own copy of the game)
+PROGRESS.md Detailed development notes (Spanish)
 ```
-
-(The layout may change as the project takes shape.)
 
 ## Legal notice
 
 - This project contains **no game assets and no original game binaries**: no `game.dol`, no art, audio, text,
   scripts or other copyrighted data from Konami / M2 will ever be distributed here.
 - To build or run anything you will need **your own legally obtained copy** of the game (extracted by you from
-  your own console / WAD). The tools in this repository only read files you provide.
+  your own console / WAD). The tools in this repository only read files you provide. The C++ the translator generates from your `game.dol` is
+  written to a git-ignored folder on your machine and is never committed.
 - *Castlevania* and *Castlevania: The Adventure ReBirth* are trademarks / property of Konami Digital Entertainment.
   This is an **unofficial, non-commercial fan project** for preservation and educational purposes. It is not
   affiliated with, endorsed by or sponsored by Konami, M2 or Nintendo.
@@ -64,10 +68,13 @@ Open-source tools and projects that make this kind of work possible: Ghidra, dec
 Dolphin (as a reference for Wii hardware behaviour), SDL2 and OpenGL / GLEW, and the wider Wii / GameCube
 decompilation community.
 
+## License
+
+No license has been chosen yet. Until one is added, all rights are reserved by the author.
+
 ## Contributing
 
-While this is a placeholder there is nothing to contribute to yet. Once the code is published, issues and
-pull requests (function matching, documentation, bug reports) will be welcome; guidelines will be added then.
+Issues and pull requests (function naming, documentation, bug reports) are welcome. Guidelines will be added later.
 
 ---
 
@@ -75,9 +82,9 @@ pull requests (function matching, documentation, bug reports) will be welcome; g
 
 ## Español
 
-> **Estado: marcador de posición / trabajo en curso.** Este repositorio alojará la decompilación legible y
-> documentada de *Castlevania: The Adventure ReBirth* (WiiWare, 2009) y un port nativo para PC construido a
-> partir de ella. El código se publicará aquí cuando esté lo bastante limpio y documentado para ser útil a otros.
+> **Estado: trabajo en curso.** Este repositorio aloja las herramientas y el runtime nativo de un port para PC de
+> *Castlevania: The Adventure ReBirth* (WiiWare, 2009), y la decompilación legible y documentada que se escribe
+> encima. El port ejecuta el juego hasta el Stage 1; mira [BUILD.md](BUILD.md) para compilarlo con tu propia copia del juego.
 
 ### ¿Qué es este proyecto?
 
@@ -91,9 +98,9 @@ desarrollado por Konami / M2 para WiiWare. El proyecto busca:
 3. Documentar el motor del juego, sus formatos de archivo (`.psb`, `.brsar`, `.brstm`...) y las partes del SDK de
    Wii que usa, como referencia para proyectos similares.
 
-### Estado actual (desarrollo privado)
+### Estado actual
 
-El trabajo realizado vive fuera de este repositorio y se está depurando. Situación:
+Situación:
 
 - Hecho: Todo `game.dol` está elevado a C++ y **corre de forma nativa en x86-64 Linux**, sin emulador:
   arranque, hilos, temporizadores, acceso a archivos/NAND, intro, título, mapa y Stage 1.
@@ -101,22 +108,27 @@ El trabajo realizado vive fuera de este repositorio y se está depurando. Situac
   hasta 4x, 60 FPS en el Stage 1.
 - Hecho: **Audio**: el SDK de audio real de Wii (AX / NW4R SND) sobre un mezclador DSP por software, con salida
   por SDL2 (música y efectos).
-- Hecho: Entrada por teclado (el juego se maneja con el Wii Remote en horizontal), menú de ajustes dentro del juego
+- Hecho: Entrada por teclado y mando (el juego se maneja con el Wii Remote en horizontal), menú de ajustes dentro del juego
   (VSync, límite de FPS, filtros, resolución, pantalla completa) y contador de FPS.
 - Hecho: El guardado funciona (NAND emulada en una carpeta local).
 - En curso: Sustituir el código máquina elevado por C/C++ legible, escrito a mano y documentado, función a función.
-- En curso: Builds para Windows / macOS, soporte de mando, mapeo del Classic Controller / mando de GameCube.
+- Hecho: Build para Windows (MSYS2), 60 FPS estables en escenas con mucha acción. El runtime incluye un perfilador por muestreo.
+- En curso: Build para macOS, mapeo del Classic Controller / mando de GameCube.
 - En curso: Funciones aún sin elevar, detalles del renderizador y rendimiento.
 
-> Nada de lo anterior está publicado todavía. Este README se actualizará cuando lo esté el código.
+Unas 1.100 de las aproximadamente 6.300 funciones sin nombre ya tienen un nombre legible (`decomp/game/config/renames.txt`).
 
-### Estructura prevista
+### Estructura del repositorio
 
 ```
-src/        Código del juego decompilado / portado (legible y documentado)
-runtime/    Capa de plataforma: ventana SDL2 + renderizador OpenGL, mezclador de audio, entrada, archivos
-tools/      Scripts para extraer datos, dividir el binario y verificar la decompilación
-docs/       Notas sobre el motor, los formatos de archivo y el SDK de Wii
+runtime/    Capa de plataforma: ventana SDL2 + renderizador OpenGL, mezclador de audio, entrada, archivos, sustitutos del SDK
+decomp/     Herramientas que traducen game.dol a C++ (elevador), tablas de símbolos, renombres, script de importación de Ghidra
+src/        Código del juego decompilado, legible y escrito a mano (gameplay, motor)
+include/    Cabeceras de lo anterior
+scripts/    Scripts auxiliares
+tests/      Pruebas diferenciales del traductor
+BUILD.md    Cómo compilar y ejecutar (hace falta tu propia copia del juego)
+PROGRESS.md Notas de desarrollo detalladas
 ```
 
 ### Aviso legal
@@ -124,7 +136,8 @@ docs/       Notas sobre el motor, los formatos de archivo y el SDK de Wii
 - Este proyecto **no contiene recursos ni binarios originales del juego**: nunca se distribuirá aquí ningún
   `game.dol`, ni arte, audio, textos, scripts u otros datos con copyright de Konami / M2.
 - Para compilar o ejecutar algo necesitarás **tu propia copia legal** del juego (extraída por ti de tu consola /
-  WAD). Las herramientas de este repositorio solo leen archivos que tú aportas.
+  WAD). Las herramientas de este repositorio solo leen archivos que tú aportas. El C++ que el traductor genera a partir de tu
+  `game.dol` se escribe en una carpeta ignorada por git en tu equipo y nunca se sube.
 - *Castlevania* y *Castlevania: The Adventure ReBirth* son marcas / propiedad de Konami Digital Entertainment.
   Este es un **proyecto de fans no oficial y sin ánimo de lucro**, con fines de preservación y educativos. No está
   afiliado, respaldado ni patrocinado por Konami, M2 ni Nintendo.
@@ -135,8 +148,10 @@ Herramientas y proyectos de código abierto que hacen posible este trabajo: Ghid
 Dolphin (como referencia del comportamiento del hardware de Wii), SDL2 y OpenGL / GLEW, y la comunidad de
 decompilación de Wii / GameCube.
 
+### Licencia
+
+Todavía no se ha elegido licencia. Hasta que se añada una, todos los derechos quedan reservados por el autor.
+
 ### Contribuir
 
-Mientras sea un marcador de posición todavía no hay nada a lo que contribuir. Cuando se publique el código, los
-issues y pull requests (equivalencia de funciones, documentación, reportes de errores) serán bienvenidos; las
-guías se añadirán entonces.
+Los issues y pull requests (nombres de funciones, documentación, reportes de errores) son bienvenidos. Las guías se añadirán más adelante.

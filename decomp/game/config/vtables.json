@@ -1,0 +1,2608 @@
+{
+ "EcoScratch@80243A00": {
+  "ctor_candidates": [
+   "80007A70"
+  ],
+  "slots": [
+   "80007AC0",
+   "pure",
+   "pure",
+   "pure"
+  ]
+ },
+ "ENDamaged@80243A24": {
+  "ctor_candidates": [
+   "800077A0"
+  ],
+  "slots": [
+   "800078D0",
+   "pure",
+   "pure",
+   "pure",
+   "80007B70"
+  ]
+ },
+ "ENDamager@80243A4C": {
+  "ctor_candidates": [
+   "800076D0"
+  ],
+  "slots": [
+   "80007710",
+   "pure",
+   "pure",
+   "pure",
+   "80007B80"
+  ]
+ },
+ "ENRestricted@80243A78": {
+  "ctor_candidates": [
+   "800075B0"
+  ],
+  "slots": [
+   "80007610",
+   "pure",
+   "pure",
+   "pure",
+   "pure",
+   "pure",
+   "80007B90",
+   "80007BB0"
+  ]
+ },
+ "MTask@80243AE0": {
+  "ctor_candidates": [
+   "80008FE0"
+  ],
+  "slots": [
+   "80008FE0",
+   "8013AF90",
+   "8013B070",
+   "8013B060",
+   "pure",
+   "pure",
+   "pure",
+   "pure",
+   "pure",
+   "pure"
+  ]
+ },
+ "CTEngine@80243B30": {
+  "ctor_candidates": [
+   "800141E0"
+  ],
+  "slots": [
+   "80009280",
+   "800086F0",
+   "8013A560"
+  ]
+ },
+ "CTQuake@80243B84": {
+  "ctor_candidates": [
+   "80007DA0"
+  ],
+  "slots": [
+   "80009310",
+   "80009300",
+   "80008320"
+  ]
+ },
+ "CTPrimitiveLayer@80243BB8": {
+  "ctor_candidates": [
+   "800141C0"
+  ],
+  "slots": [
+   "800093C0",
+   "80007C10",
+   "8013A560"
+  ]
+ },
+ "MProcess@802445A8": {
+  "ctor_candidates": [
+   "80009400"
+  ],
+  "slots": [
+   "80009470",
+   "8013AF90",
+   "80009510",
+   "80009500"
+  ]
+ },
+ "CTMapTerrain@80244628": {
+  "ctor_candidates": [
+   "80009C00"
+  ],
+  "slots": [
+   "80009E50"
+  ]
+ },
+ "MInputHub@80244794": {
+  "ctor_candidates": [
+   "8000B7A0",
+   "8000B830",
+   "8000B8C0",
+   "80038920"
+  ],
+  "slots": [
+   "801504B0",
+   "801505B0",
+   "80150810",
+   "80150940",
+   "8000B720"
+  ]
+ },
+ "CTRsc@80244E48": {
+  "ctor_candidates": [
+   "8000C7F0"
+  ],
+  "slots": [
+   "8000C860",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "MCallTask0<DrcPlayerBase, DrcPlayerBase>@80245260": {
+  "ctor_candidates": [
+   "800672B0"
+  ],
+  "slots": [
+   "800222D0",
+   "8001F4F0",
+   "8013A560"
+  ]
+ },
+ "SelectContinueTask@802452D8": {
+  "ctor_candidates": [
+   "8001A110"
+  ],
+  "slots": [
+   "800221E0",
+   "8001F2B0",
+   "8013A560"
+  ]
+ },
+ "SelectContinueTask::WaitSelectTask@8024531C": {
+  "ctor_candidates": [
+   "800184E0",
+   "8001A590",
+   "8003A870"
+  ],
+  "slots": [
+   "800221A0",
+   "8001FAF0",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<GrSound, GrSound>@802453A8": {
+  "ctor_candidates": [
+   "800171A0"
+  ],
+  "slots": [
+   "80022120",
+   "8001FBC0",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<DrcEngine, DrcEngine>@802453EC": {
+  "ctor_candidates": [
+   "8003A980",
+   "8003B430"
+  ],
+  "slots": [
+   "800220E0",
+   "8001F510",
+   "8013A560"
+  ]
+ },
+ "ValAnimeTask<MPointTemplate<float>>@80245430": {
+  "ctor_candidates": [
+   "8003A920"
+  ],
+  "slots": [
+   "8001F5B0",
+   "pure"
+  ]
+ },
+ "ValAnime<MPointTemplate<float>>@80245460": {
+  "ctor_candidates": [
+   "8001F350"
+  ],
+  "slots": [
+   "8001F350",
+   "8001F2D0",
+   "8013A560"
+  ]
+ },
+ "AllClearTask@80245490": {
+  "ctor_candidates": [
+   "8000D7A0",
+   "80012C50",
+   "80018920"
+  ],
+  "slots": [
+   "800220A0",
+   "8001FC00",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<DrcShareMapTexture, DrcShareMapTexture>@802454E8": {
+  "ctor_candidates": [
+   "80010FE0"
+  ],
+  "slots": [
+   "80022020",
+   "8013AF90",
+   "8013B070",
+   "8001E2F0"
+  ]
+ },
+ "ClearScoreCountTask@80245528": {
+  "ctor_candidates": [
+   "800142E0"
+  ],
+  "slots": [
+   "80021FE0",
+   "8001E270",
+   "8013A560"
+  ]
+ },
+ "FloorMoveCall@80245558": {
+  "ctor_candidates": [
+   "8001DEA0",
+   "8001E190"
+  ],
+  "slots": [
+   "8001E190",
+   "pure"
+  ]
+ },
+ "FloorMoveObj@80245578": {
+  "ctor_candidates": [
+   "8000C970"
+  ],
+  "slots": [
+   "8000C970",
+   "8000CAA0",
+   "8000CAB0"
+  ]
+ },
+ "DrcDebugPrimitive@802455B0": {
+  "ctor_candidates": [
+   "8000E090",
+   "80010A90"
+  ],
+  "slots": [
+   "80010A90",
+   "8013AF90",
+   "800118A0",
+   "80011820",
+   "8001F410",
+   "8001F400",
+   "8001F3F0",
+   "8001F3E0",
+   "8001AD60",
+   "8001F3D0"
+  ]
+ },
+ "DrcEngine@80245608": {
+  "ctor_candidates": [
+   "80017480"
+  ],
+  "slots": [
+   "80021F60",
+   "80017A10",
+   "8013A560"
+  ]
+ },
+ "DrcScrollCtrl@80245638": {
+  "ctor_candidates": [
+   "8000CDB0",
+   "8000CDE0"
+  ],
+  "slots": [
+   "8000CDE0"
+  ]
+ },
+ "DrcShareMapTexture@80245678": {
+  "ctor_candidates": [
+   "80045CA0",
+   "80046A00",
+   "80046E70",
+   "80048180",
+   "80048C50",
+   "8004EE90",
+   "8004FC10",
+   "80051000",
+   "80051AB0",
+   "80054E00",
+   "800620F0",
+   "80072EC0",
+   "8007AAB0",
+   "80082FE0",
+   "80083A10",
+   "80084510",
+   "800850F0",
+   "80086300",
+   "80088220",
+   "80089020",
+   "80089870",
+   "8008A370",
+   "8008ADE0",
+   "8008BC60",
+   "8008CFF0",
+   "8008ED30",
+   "8008F8E0",
+   "80090600",
+   "800AE870"
+  ],
+  "slots": [
+   "80021F20",
+   "8001F420",
+   "8013A560",
+   "pure"
+  ]
+ },
+ "DrcMotion::WaitStopTask@802456B4": {
+  "ctor_candidates": [
+   "80050CB0",
+   "8005FA20",
+   "80075C20",
+   "80076C10",
+   "80076F10",
+   "8007E550",
+   "80096120"
+  ],
+  "slots": [
+   "80021EE0",
+   "8001F460",
+   "8013A560"
+  ]
+ },
+ "DrcMotionPlayer::WaitStopTask2@8024570C": {
+  "ctor_candidates": [
+   "8013A690"
+  ],
+  "slots": [
+   "pure",
+   "pure",
+   "pure"
+  ]
+ },
+ "MapObjCloud@80245DC8": {
+  "ctor_candidates": [
+   "80025420"
+  ],
+  "slots": [
+   "80029280",
+   "8013AF90",
+   "8013B070",
+   "80028930"
+  ]
+ },
+ "DrcBgChangeAnime@80245E50": {
+  "ctor_candidates": [
+   "800224A0"
+  ],
+  "slots": [
+   "80029200",
+   "8013AF90",
+   "8013B070",
+   "800289C0"
+  ]
+ },
+ "LoadMapObjMotionTask@80245E98": {
+  "ctor_candidates": [
+   "800250F0"
+  ],
+  "slots": [
+   "80029180",
+   "8013AF90",
+   "8013B070",
+   "80028CC0"
+  ]
+ },
+ "MCallTask1<CTRsc, CTRsc, long>@802463C8": {
+  "ctor_candidates": [
+   "8002D990"
+  ],
+  "slots": [
+   "8002D990",
+   "8013AF90",
+   "8013B070",
+   "8002D640"
+  ]
+ },
+ "DrcNowLoading@80246408": {
+  "ctor_candidates": [
+   "8002BB20"
+  ],
+  "slots": [
+   "8002E690",
+   "8013AF90",
+   "8013B070",
+   "8002DA50"
+  ]
+ },
+ "StaffTask@80246440": {
+  "ctor_candidates": [
+   "8002DA50"
+  ],
+  "slots": [
+   "8002E610",
+   "8013AF90",
+   "8013B070",
+   "8002DB90"
+  ]
+ },
+ "EndingStaffTask@8024647C": {
+  "ctor_candidates": [
+   "8002A530"
+  ],
+  "slots": [
+   "8002E5B0",
+   "801240B0",
+   "80141170",
+   "801241F0",
+   "80124200"
+  ]
+ },
+ "DrcMain@802464F0": {
+  "ctor_candidates": [
+   "8002B320",
+   "8002BCF0",
+   "8002BF50",
+   "8002C420",
+   "8002C680",
+   "8002CCE0"
+  ],
+  "slots": [
+   "8002D020",
+   "8013AF90",
+   "8013B070",
+   "8002D0A0"
+  ]
+ },
+ "CTRenderScreen@80246530": {
+  "ctor_candidates": [
+   "80029620"
+  ],
+  "slots": [
+   "80029620",
+   "8013AF90",
+   "8013B070",
+   "800296B0"
+  ]
+ },
+ "CoordAnimeTask@80246918": {
+  "ctor_candidates": [
+   "8002EAD0",
+   "80031B20"
+  ],
+  "slots": [
+   "80031B20",
+   "8013AF90",
+   "8013B070",
+   "80030740"
+  ]
+ },
+ "LoadListTask@80246954": {
+  "ctor_candidates": [
+   "80030170"
+  ],
+  "slots": [
+   "80031E60",
+   "80030270",
+   "8013A560"
+  ]
+ },
+ "DrcSlaveMotionTask@80246988": {
+  "ctor_candidates": [
+   "8002EBB0",
+   "8002ED60",
+   "8002FE00"
+  ],
+  "slots": [
+   "80031E20",
+   "8002E920"
+  ]
+ },
+ "DrcMotionEventListner@802469BC": {
+  "ctor_candidates": [
+   "8001EC30",
+   "80024BA0",
+   "80028610",
+   "8002D640",
+   "8002FBE0",
+   "80032E50",
+   "80033700",
+   "80035180",
+   "8003A0B0",
+   "80041620",
+   "800447E0",
+   "80045130",
+   "80046120",
+   "8004A670",
+   "8004BA70",
+   "8004BF70",
+   "8004CE30",
+   "8004D710",
+   "8004E890",
+   "8004F8C0",
+   "80053B10",
+   "80056090",
+   "800581B0",
+   "80062330",
+   "800635E0",
+   "80064D00",
+   "8006E3F0",
+   "800727C0",
+   "80075080",
+   "8007C280",
+   "80080E00",
+   "80082B40",
+   "80083640",
+   "800841F0",
+   "80084D60",
+   "80085A60",
+   "80085FD0",
+   "800869C0",
+   "80087810",
+   "80087D20",
+   "80089340",
+   "80089F70",
+   "8008A8E0",
+   "8008B790",
+   "8008C6F0",
+   "8008CC00",
+   "8008D590",
+   "8008E220",
+   "8008E880",
+   "8008F450",
+   "800902D0",
+   "80090AA0",
+   "80091880",
+   "80091FA0",
+   "80092A20",
+   "80093AF0",
+   "800944F0",
+   "800954B0",
+   "800959C0",
+   "80095C40",
+   "80097C70",
+   "80098300",
+   "800986F0",
+   "80098C30",
+   "8009AFE0",
+   "8009BB00",
+   "8009BF90",
+   "8009D4C0",
+   "8009DA60",
+   "8009E070",
+   "800A73D0",
+   "800B2170"
+  ],
+  "slots": [
+   "80031D70",
+   "8012C560"
+  ]
+ },
+ "DrcMotion@80246A10": {
+  "ctor_candidates": [
+   "8002F8D0"
+  ],
+  "slots": [
+   "80031D00",
+   "80031BC0",
+   "8013A560"
+  ]
+ },
+ "DrcMotion::PlayTask@80246A48": {
+  "ctor_candidates": [
+   "8002ECC0",
+   "80031D70"
+  ],
+  "slots": [
+   "8002ECC0",
+   "8012C560"
+  ]
+ },
+ "DrcMotionPlayer@80246A74": {
+  "ctor_candidates": [
+   "8002F5B0",
+   "8002F710"
+  ],
+  "slots": [
+   "80031C90",
+   "80031C10",
+   "8013A560"
+  ]
+ },
+ "DrcIndicator@80246C90": {
+  "ctor_candidates": [
+   "80032700"
+  ],
+  "slots": [
+   "80033890",
+   "8013AF90",
+   "8013B070",
+   "80033250"
+  ]
+ },
+ "BoxTask@80246E90": {
+  "ctor_candidates": [
+   "800346F0"
+  ],
+  "slots": [
+   "800346F0",
+   "8013AF90",
+   "8013B070",
+   "800347F0"
+  ]
+ },
+ "MCallTask1<BlinkIndicator, BlinkIndicator, long>@80247340": {
+  "ctor_candidates": [
+   "8003BE10"
+  ],
+  "slots": [
+   "8003BE10",
+   "8013AF90",
+   "8013B070",
+   "8003BDB0"
+  ]
+ },
+ "KeyAssignButtonIcon@80247428": {
+  "ctor_candidates": [
+   "8003A3D0"
+  ],
+  "slots": [
+   "8003CBF0",
+   "8013AF90",
+   "8013B070",
+   "8013B060",
+   "8003A650"
+  ]
+ },
+ "KeyAssignOnOffItem@80247474": {
+  "ctor_candidates": [
+   "80034F60"
+  ],
+  "slots": [
+   "800350E0",
+   "8013AF90",
+   "8013B070",
+   "8013B060",
+   "8003A780"
+  ]
+ },
+ "SystemGauge@80247530": {
+  "ctor_candidates": [
+   "8003A060"
+  ],
+  "slots": [
+   "8003CA70",
+   "8013AF90",
+   "8003C0C0",
+   "8003C3B0"
+  ]
+ },
+ "ScreenAdjustFrame@80247570": {
+  "ctor_candidates": [
+   "80039B60"
+  ],
+  "slots": [
+   "8003C9B0",
+   "8013AF90",
+   "8013B070",
+   "8003C400",
+   "80039F50",
+   "8003C480",
+   "80039E10"
+  ]
+ },
+ "OptionPlayerStyleMenu@802475D0": {
+  "ctor_candidates": [
+   "800398F0"
+  ],
+  "slots": [
+   "8003C910",
+   "8013AF90",
+   "8013B070",
+   "8003C400",
+   "80039F50",
+   "8003C5F0",
+   "800393D0"
+  ]
+ },
+ "OptionPlayerStockMenu@80247630": {
+  "ctor_candidates": [
+   "800394B0"
+  ],
+  "slots": [
+   "8003C850",
+   "8013AF90",
+   "8013B070",
+   "8003C400",
+   "80039F50",
+   "8003C480",
+   "80039800"
+  ]
+ },
+ "OptionValueMenu<unsigned long>@802476F0": {
+  "ctor_candidates": [
+   "80038C10"
+  ],
+  "slots": [
+   "8003C7B0",
+   "8013AF90",
+   "8013B070",
+   "8003C400",
+   "80039F50",
+   "8003C5F0",
+   "800393D0"
+  ]
+ },
+ "OptionVolumeMenu@8024774C": {
+  "ctor_candidates": [
+   "80038E80"
+  ],
+  "slots": [
+   "80039330",
+   "8013AF90",
+   "8013B070",
+   "8003C400",
+   "80039F50",
+   "8003C5F0",
+   "800393D0"
+  ]
+ },
+ "OptionMenuBase@802477F0": {
+  "ctor_candidates": [
+   "800385C0",
+   "800390D0",
+   "8003B110"
+  ],
+  "slots": [
+   "8003C710",
+   "8013AF90",
+   "8013B070",
+   "8003C410"
+  ]
+ },
+ "BlinkIndicator@8024782C": {
+  "ctor_candidates": [
+   "80039F60"
+  ],
+  "slots": [
+   "8003C6D0",
+   "8003C460",
+   "8013A560"
+  ]
+ },
+ "DrcStaff::WaitFinishTask@80247868": {
+  "ctor_candidates": [
+   "80035C10"
+  ],
+  "slots": [
+   "80035C10",
+   "8013AF90",
+   "8013B070",
+   "80035D90"
+  ]
+ },
+ "DrcInputFilter@80247A48": {
+  "ctor_candidates": [
+   "8003D570"
+  ],
+  "slots": [
+   "8003D570",
+   "8000BCB0",
+   "8013A560"
+  ]
+ },
+ "DrcInputHub@80247AA8": {
+  "ctor_candidates": [
+   "8003CFF0"
+  ],
+  "slots": [
+   "8003E930",
+   "8000BCB0",
+   "8013A560"
+  ]
+ },
+ "CreditIndicator@80247BD0": {
+  "ctor_candidates": [
+   "8003EA50",
+   "8003EB20"
+  ],
+  "slots": [
+   "8003EB20",
+   "8013AF90",
+   "8013B070",
+   "8003ECA0"
+  ]
+ },
+ "WaitScreenInTask@80247FD0": {
+  "ctor_candidates": [
+   "80043D00"
+  ],
+  "slots": [
+   "80044750",
+   "80043D60",
+   "8013A560"
+  ]
+ },
+ "BSplineMover@80248000": {
+  "ctor_candidates": [
+   "80043B60"
+  ],
+  "slots": [
+   "80044710",
+   "80044190",
+   "8013A560"
+  ]
+ },
+ "DrcEnemyAction@80248030": {
+  "ctor_candidates": [
+   "80043A80",
+   "80043AA0"
+  ],
+  "slots": [
+   "80043AA0"
+  ]
+ },
+ "DrcEnemyCount@8024804C": {
+  "ctor_candidates": [
+   "800437C0"
+  ],
+  "slots": [
+   "800446D0",
+   "80043840",
+   "8013A560"
+  ]
+ },
+ "DrcObjectColorFilter@80248084": {
+  "ctor_candidates": [
+   "800438C0"
+  ],
+  "slots": [
+   "80044210",
+   "80043910",
+   "8013A560"
+  ]
+ },
+ "DrcMotionWatch@802480B4": {
+  "ctor_candidates": [
+   "80041A90"
+  ],
+  "slots": [
+   "80041B40",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "DrcObjectBase@80248130": {
+  "ctor_candidates": [
+   "800419B0",
+   "80041A10"
+  ],
+  "slots": [
+   "80041A10",
+   "8001CBA0"
+  ]
+ },
+ "ValAnimeTask<float>@802488F0": {
+  "ctor_candidates": [
+   "800671E0"
+  ],
+  "slots": [
+   "8004A2E0",
+   "pure"
+  ]
+ },
+ "ValAnime<float>@80248910": {
+  "ctor_candidates": [
+   "800480A0"
+  ],
+  "slots": [
+   "8004A490",
+   "80047330",
+   "800473B0",
+   "800473C0",
+   "80047460",
+   "80047470",
+   "80047420",
+   "8004A0D0"
+  ]
+ },
+ "HagurumaRestrictor@802489F8": {
+  "ctor_candidates": [
+   "800475C0",
+   "800489A0"
+  ],
+  "slots": [
+   "800489A0",
+   "8013AF90",
+   "80049C10",
+   "80048C50"
+  ]
+ },
+ "DrcObjectWall@80248AAC": {
+  "ctor_candidates": [
+   "800481E0"
+  ],
+  "slots": [
+   "800473A0"
+  ]
+ },
+ "DrcRideWatch@80248AC8": {
+  "ctor_candidates": [
+   "800472C0"
+  ],
+  "slots": [
+   "80048120",
+   "80047330",
+   "800473B0",
+   "800473C0",
+   "80047460",
+   "80047470",
+   "80047420",
+   "80047440"
+  ]
+ },
+ "SetClearCrystalWait@80248EE4": {
+  "ctor_candidates": [
+   "8004AAC0"
+  ],
+  "slots": [
+   "8004AAC0",
+   "8013AF90",
+   "8013B070",
+   "8004AD50"
+  ]
+ },
+ "DrcObjectSuisyaFloor@80249204": {
+  "ctor_candidates": [
+   "8004C5D0",
+   "8004CB00"
+  ],
+  "slots": [
+   "8004CB00",
+   "8013AF90",
+   "8004CDF0",
+   "8004CC40"
+  ]
+ },
+ "DrcBatGenerator@802495E4": {
+  "ctor_candidates": [
+   "8004F320",
+   "8004F6D0"
+  ],
+  "slots": [
+   "8004FBA0",
+   "8013AF90",
+   "8013B070",
+   "8004FC10"
+  ]
+ },
+ "DrcEnemyBat2@8024973C": {
+  "ctor_candidates": [
+   "8004FF00",
+   "8004FF70"
+  ],
+  "slots": [
+   "80050940",
+   "8004FF20",
+   "8013A560"
+  ]
+ },
+ "DrcBubbleEyeFire@80249970": {
+  "ctor_candidates": [
+   "80050A20"
+  ],
+  "slots": [
+   "80052A50",
+   "8013AF90",
+   "800AEFB0",
+   "800AEEB0"
+  ]
+ },
+ "DrcBigEyeGenerator@802499DC": {
+  "ctor_candidates": [
+   "80051770"
+  ],
+  "slots": [
+   "80051770",
+   "8013AF90",
+   "8013B070",
+   "80051A80"
+  ]
+ },
+ "DrcEnemySkeltonBone@80249FB0": {
+  "ctor_candidates": [
+   "80054AE0"
+  ],
+  "slots": [
+   "80054AE0",
+   "8013AF90",
+   "8013B070",
+   "80054E00"
+  ]
+ },
+ "DrcEnemyNSScythe@8024A3A8": {
+  "ctor_candidates": [
+   "80056B60"
+  ],
+  "slots": [
+   "80056B60",
+   "8013AF90",
+   "80057FA0",
+   "80056D90"
+  ]
+ },
+ "KokoumoriPosition@8024A6E0": {
+  "ctor_candidates": [
+   "8005AAC0"
+  ],
+  "slots": [
+   "8005AAC0",
+   "8013AF90",
+   "8013B070",
+   "8005AED0"
+  ]
+ },
+ "DrcEnemyKokoumori@8024A768": {
+  "ctor_candidates": [
+   "80058D10"
+  ],
+  "slots": [
+   "80058D10",
+   "8013AF90",
+   "8013B070",
+   "80058F10"
+  ]
+ },
+ "SetValTask<float>@8024AC60": {
+  "ctor_candidates": [
+   "80081FC0"
+  ],
+  "slots": [
+   "8005EEA0",
+   "8005ED80",
+   "8013A560"
+  ]
+ },
+ "DrcEnemyBossEyeBeam@8024AD28": {
+  "ctor_candidates": [
+   "8005BC70"
+  ],
+  "slots": [
+   "8005BC70",
+   "8013AF90",
+   "8005E5F0",
+   "8005C520"
+  ]
+ },
+ "DrcDeathKogama2@8024B628": {
+  "ctor_candidates": [
+   "800644B0"
+  ],
+  "slots": [
+   "80065F90",
+   "8013AF90",
+   "8013B070",
+   "800645D0"
+  ]
+ },
+ "DrcDeathKama@8024B6C8": {
+  "ctor_candidates": [
+   "800643A0",
+   "80065F90",
+   "80066090"
+  ],
+  "slots": [
+   "800643A0",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "DrcDeathKamaBase@8024B760": {
+  "ctor_candidates": [
+   "80064FC0"
+  ],
+  "slots": [
+   "80064FC0",
+   "8013AF90",
+   "8013B070",
+   "80065080"
+  ]
+ },
+ "DrcEnemyDeathKama@8024B800": {
+  "ctor_candidates": [
+   "80063930"
+  ],
+  "slots": [
+   "80063930",
+   "8013AF90",
+   "8013B070",
+   "800639E0"
+  ]
+ },
+ "DrcEnemyGensouKama@8024B888": {
+  "ctor_candidates": [
+   "80062BD0"
+  ],
+  "slots": [
+   "80062BD0",
+   "8013AF90",
+   "8013B070",
+   "80062CB0"
+  ]
+ },
+ "DrcDokuroShot@8024B910": {
+  "ctor_candidates": [
+   "80062580"
+  ],
+  "slots": [
+   "80062580",
+   "8013AF90",
+   "8013B070",
+   "80062630"
+  ]
+ },
+ "DrcYokokamaEffect@8024BA20": {
+  "ctor_candidates": [
+   "8005F910"
+  ],
+  "slots": [
+   "8005F910",
+   "8013AF90",
+   "8013B070",
+   "8005FA20"
+  ]
+ },
+ "MCallTask0<DrcEnemyBunshinDeath, DrcEnemyBunshinDeath>@8024BDF4": {
+  "ctor_candidates": [
+   "80067150"
+  ],
+  "slots": [
+   "80067EB0",
+   "80067E70",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<DrcDamage, DrcDamage>@8024BE88": {
+  "ctor_candidates": [
+   "80067970"
+  ],
+  "slots": [
+   "80067970",
+   "8013AF90",
+   "8013B070",
+   "80067A60"
+  ]
+ },
+ "DrcEnemyDeathKamaOtedama@8024BF30": {
+  "ctor_candidates": [
+   "80066790"
+  ],
+  "slots": [
+   "80066790",
+   "8013AF90",
+   "8013B070",
+   "80066890"
+  ]
+ },
+ "ValAnime<unsigned long>@8024C3AC": {
+  "ctor_candidates": [
+   "8006A0A0"
+  ],
+  "slots": [
+   "8006C370",
+   "8006C2A0",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<DrcEnemyBossSword, DrcEnemyBossSword>@8024C518": {
+  "ctor_candidates": [
+   "8006AC80"
+  ],
+  "slots": [
+   "8006AC80",
+   "8013AF90",
+   "8013B070",
+   "8006B100"
+  ]
+ },
+ "DrcEnemyBossSwordParts@8024C5A8": {
+  "ctor_candidates": [
+   "800683A0"
+  ],
+  "slots": [
+   "800683A0",
+   "8013AF90",
+   "8013B070",
+   "80068500"
+  ]
+ },
+ "DrcEnemyBossSword@8024C668": {
+  "ctor_candidates": [
+   "80067F80"
+  ],
+  "slots": [
+   "8006C2E0"
+  ]
+ },
+ "DrcEnemyBossJellyBone@8024CA50": {
+  "ctor_candidates": [
+   "8006D0D0"
+  ],
+  "slots": [
+   "8006D0D0",
+   "8013AF90",
+   "8013B070",
+   "8006D560"
+  ]
+ },
+ "HahenTask@8024D0D8": {
+  "ctor_candidates": [
+   "80072D00"
+  ],
+  "slots": [
+   "80072D00",
+   "8013AF90",
+   "800732F0",
+   "80072EC0"
+  ]
+ },
+ "DrcEnemyBossHydeRock@8024D1A8": {
+  "ctor_candidates": [
+   "8006F6A0"
+  ],
+  "slots": [
+   "8006F6A0",
+   "8013AF90",
+   "80072780",
+   "8006FE50"
+  ]
+ },
+ "DrcDraculaFire@8024D6B8": {
+  "ctor_candidates": [
+   "800744F0"
+  ],
+  "slots": [
+   "800744F0",
+   "8013AF90",
+   "8013B070",
+   "800745D0"
+  ]
+ },
+ "DrcDracula2Fire@8024DB58": {
+  "ctor_candidates": [
+   "80076AC0",
+   "80077200",
+   "800772A0"
+  ],
+  "slots": [
+   "80076AC0",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "DrcDracula2ShotBase@8024DBE0": {
+  "ctor_candidates": [
+   "800756A0",
+   "80075B00"
+  ],
+  "slots": [
+   "80075B00",
+   "8013AF90",
+   "8013B070",
+   "80075C20"
+  ]
+ },
+ "DrcSetBigFaceFogTask@8024E1A8": {
+  "ctor_candidates": [
+   "80077A70"
+  ],
+  "slots": [
+   "8007B190"
+  ]
+ },
+ "BigFaceScrollLimiter@8024E1FC": {
+  "ctor_candidates": [
+   "80077A00"
+  ],
+  "slots": [
+   "8007BBB0",
+   "8007B230",
+   "8013A560"
+  ]
+ },
+ "DrcBigFaceEffectAgoDead@8024E2C0": {
+  "ctor_candidates": [
+   "80077410",
+   "80077AA0"
+  ],
+  "slots": [
+   "80077AA0",
+   "8013AF90",
+   "8013B070",
+   "80077C30"
+  ]
+ },
+ "DrcEnemyBossBigFace@8024E380": {
+  "ctor_candidates": [
+   "80077950"
+  ],
+  "slots": [
+   "8007BAF0"
+  ]
+ },
+ "DrcEnemyBossBigFaceFloor@8024E690": {
+  "ctor_candidates": [
+   "8007BF20"
+  ],
+  "slots": [
+   "8007CEA0"
+  ]
+ },
+ "DrcBigFaceSnakeThunder@8024E9B4": {
+  "ctor_candidates": [
+   "8007F870",
+   "8007F8B0"
+  ],
+  "slots": [
+   "8007F8B0",
+   "8007F940",
+   "8013A560"
+  ]
+ },
+ "DrcBigFaceMagicThunderCreate@8024E9F8": {
+  "ctor_candidates": [
+   "8007F940"
+  ],
+  "slots": [
+   "80080C80",
+   "8013AF90",
+   "8013B070",
+   "8007F7A0"
+  ]
+ },
+ "DrcBigFaceMagicThunder@8024EA8C": {
+  "ctor_candidates": [
+   "8007F640",
+   "8007F680"
+  ],
+  "slots": [
+   "8007F680",
+   "8007F710",
+   "8013A560"
+  ]
+ },
+ "DrcBigFaceMagicFireCreate@8024EAC8": {
+  "ctor_candidates": [
+   "8007F710"
+  ],
+  "slots": [
+   "80080BB0",
+   "8013AF90",
+   "8013B070",
+   "8007F570"
+  ]
+ },
+ "DrcBigFaceShotAwa@8024ED00": {
+  "ctor_candidates": [
+   "8007DED0"
+  ],
+  "slots": [
+   "800808E0",
+   "8013AF90",
+   "8013B070",
+   "8007E510"
+  ]
+ },
+ "DrcBigFaceShotHibashira2@8024ED98": {
+  "ctor_candidates": [
+   "8007D1E0"
+  ],
+  "slots": [
+   "80080810",
+   "8013AF90",
+   "8013B070",
+   "8007DED0"
+  ]
+ },
+ "DrcBigFaceShotHibashira@8024EE30": {
+  "ctor_candidates": [
+   "8007DC50"
+  ],
+  "slots": [
+   "80080740",
+   "8013AF90",
+   "8013B070",
+   "8007DD30"
+  ]
+ },
+ "DrcBigFaceShotVomit@8024EEC0": {
+  "ctor_candidates": [
+   "8007DAC0",
+   "80080740",
+   "80080810",
+   "800808E0",
+   "800809B0",
+   "80080A80",
+   "80080BB0",
+   "80080C80"
+  ],
+  "slots": [
+   "8007DAC0",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "DrcBigFaceShotBase@8024EF48": {
+  "ctor_candidates": [
+   "8007D530"
+  ],
+  "slots": [
+   "800806C0",
+   "8013AF90",
+   "8013B070",
+   "8007D5B0"
+  ]
+ },
+ "DrcBigFaceShotCreater@8024EF8C": {
+  "ctor_candidates": [
+   "8007D5B0"
+  ],
+  "slots": [
+   "80080680",
+   "8007D1E0",
+   "8013A560"
+  ]
+ },
+ "DrcEnemyHoushi@8024F1D4": {
+  "ctor_candidates": [
+   "80081370"
+  ],
+  "slots": [
+   "80081370",
+   "8013AF90",
+   "8013B070",
+   "80081570"
+  ]
+ },
+ "MCallTask0<DrcEnemyMedousa, DrcEnemyMedousa>@8024F32C": {
+  "ctor_candidates": [
+   "80082800"
+  ],
+  "slots": [
+   "80083590",
+   "800833B0",
+   "8013A560"
+  ]
+ },
+ "MedousaWaitScreenInTask@8024F364": {
+  "ctor_candidates": [
+   "80082410"
+  ],
+  "slots": [
+   "80083530",
+   "8013AF90",
+   "800AEFB0",
+   "800AEEB0"
+  ]
+ },
+ "DrcMedousaGenerator@8024F3D0": {
+  "ctor_candidates": [
+   "80082490"
+  ],
+  "slots": [
+   "80082DF0",
+   "8013AF90",
+   "8013B070",
+   "80082FE0"
+  ]
+ },
+ "born01@80251410": {
+  "ctor_candidates": [
+   "80093D70"
+  ],
+  "slots": [
+   "80093D70",
+   "8013AF90",
+   "8013B070",
+   "80093E20"
+  ]
+ },
+ "DrcEnemyBossGolemGrip@80252128": {
+  "ctor_candidates": [
+   "8009ABF0"
+  ],
+  "slots": [
+   "8009AD80",
+   "8009AE00",
+   "8009AEA0",
+   "8009AEB0",
+   "8009AEC0",
+   "8009AED0",
+   "80007B90",
+   "80007BB0"
+  ]
+ },
+ "DrcEnemyBossFrankenElec@80252818": {
+  "ctor_candidates": [
+   "8009DCE0"
+  ],
+  "slots": [
+   "8009DCE0",
+   "8013AF90",
+   "8013B070",
+   "8009DD90"
+  ]
+ },
+ "ScorePointEffect@80253030": {
+  "ctor_candidates": [
+   "800A3FE0"
+  ],
+  "slots": [
+   "800A3FE0",
+   "800A3EC0",
+   "8013A560"
+  ]
+ },
+ "DrcPlayerPowerupEffect@80253068": {
+  "ctor_candidates": [
+   "8009E700"
+  ],
+  "slots": [
+   "800A40D0",
+   "800A4050",
+   "8013A560",
+   "pure"
+  ]
+ },
+ "DrcDamage@80253460": {
+  "ctor_candidates": [
+   "800A6270",
+   "800A6410",
+   "800A6590",
+   "800A6710",
+   "800A6890",
+   "800A6A10"
+  ],
+  "slots": [
+   "800A70B0",
+   "800A6C60",
+   "8013A560"
+  ]
+ },
+ "ValAnime<unsigned char>@802534C0": {
+  "ctor_candidates": [
+   "800A6160"
+  ],
+  "slots": [
+   "800A7070",
+   "800A6C50",
+   "800A6B90"
+  ]
+ },
+ "DrcSubWeaponWhipFire@80253684": {
+  "ctor_candidates": [
+   "800A8680"
+  ],
+  "slots": [
+   "800A8790",
+   "8013AF90",
+   "8013B070",
+   "800A8870"
+  ]
+ },
+ "DrcSubWeaponHolyWater@80253744": {
+  "ctor_candidates": [
+   "800A8260"
+  ],
+  "slots": [
+   "800A83D0",
+   "8013AF90",
+   "8013B070",
+   "800A84C0"
+  ]
+ },
+ "DrcSubWeaponWatch@80253800": {
+  "ctor_candidates": [
+   "800A7DA0"
+  ],
+  "slots": [
+   "800A9640",
+   "8013AF90",
+   "8013B070",
+   "800A7ED0"
+  ]
+ },
+ "DrcSubWeaponCross@802538BC": {
+  "ctor_candidates": [
+   "800A7B70"
+  ],
+  "slots": [
+   "800A9570",
+   "8013AF90",
+   "8013B070",
+   "800A7C90"
+  ]
+ },
+ "DrcSubWeaponAxe@80253974": {
+  "ctor_candidates": [
+   "800A7960"
+  ],
+  "slots": [
+   "800A94A0",
+   "8013AF90",
+   "8013B070",
+   "800A7A80"
+  ]
+ },
+ "DrcSubWeaponKnife@80253A30": {
+  "ctor_candidates": [
+   "800A7670",
+   "800A83D0",
+   "800A8790",
+   "800A8EF0",
+   "800A94A0",
+   "800A9570",
+   "800A9640"
+  ],
+  "slots": [
+   "800A7670",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "DrcSubWeaponBase@80253AE4": {
+  "ctor_candidates": [
+   "800A70F0"
+  ],
+  "slots": [
+   "800A9430",
+   "8013AF90",
+   "8013B070",
+   "800A7180"
+  ]
+ },
+ "EffectMotion@80253EA0": {
+  "ctor_candidates": [
+   "800AE390"
+  ],
+  "slots": [
+   "800AEB20",
+   "8013AF90",
+   "8013B070",
+   "800AEA20"
+  ]
+ },
+ "EffectTaskSet@80253EE8": {
+  "ctor_candidates": [
+   "800AE7C0"
+  ],
+  "slots": [
+   "800AEAC0",
+   "8013AF90",
+   "8013B070",
+   "800AEA30"
+  ]
+ },
+ "DrcEnemyMudman@80253F70": {
+  "ctor_candidates": [
+   "800AED60"
+  ],
+  "slots": [
+   "800AED60",
+   "8013AF90",
+   "800AEFB0",
+   "800AEEB0"
+  ]
+ },
+ "LoadTextTask@80254060": {
+  "ctor_candidates": [
+   "800B0300"
+  ],
+  "slots": [
+   "800B1140",
+   "800B1100",
+   "8013A560"
+  ]
+ },
+ "DrcConsoleFilter@802542C8": {
+  "ctor_candidates": [
+   "800B3850"
+  ],
+  "slots": [
+   "800B4840",
+   "8013AF90",
+   "8013B070",
+   "800B4630"
+  ]
+ },
+ "MConsoleFilter@80254318": {
+  "ctor_candidates": [
+   "800B3DA0"
+  ],
+  "slots": [
+   "800B47A0",
+   "8013AF90",
+   "8013B070",
+   "800B3E50"
+  ]
+ },
+ "ExecEventTask@80254358": {
+  "ctor_candidates": [
+   "800B1700"
+  ],
+  "slots": [
+   "800B1700",
+   "8013AF90",
+   "8013B070",
+   "800B20F0"
+  ]
+ },
+ "DrcKoumoriGrip@802543F8": {
+  "ctor_candidates": [
+   "800B4920",
+   "800B49B0"
+  ],
+  "slots": [
+   "800B49B0",
+   "pure",
+   "pure",
+   "pure"
+  ]
+ },
+ "BgmFadeTask@802547F0": {
+  "ctor_candidates": [
+   "800B55E0",
+   "800B7860"
+  ],
+  "slots": [
+   "800B7860",
+   "8013AF90",
+   "8013B070",
+   "800B7480"
+  ]
+ },
+ "WaitLoadTask@80254860": {
+  "ctor_candidates": [
+   "800B54B0",
+   "800B5540"
+  ],
+  "slots": [
+   "800B5540",
+   "8013AF90",
+   "8013B070",
+   "800B55E0"
+  ]
+ },
+ "MHBMHook@80254AC4": {
+  "ctor_candidates": [
+   "800B8C70",
+   "800B8E60"
+  ],
+  "slots": [
+   "800B8E60",
+   "800B9990",
+   "8013A560"
+  ]
+ },
+ "MNWSound@80254BE0": {
+  "ctor_candidates": [
+   "800BA8F0",
+   "800BA950"
+  ],
+  "slots": [
+   "800BAE10",
+   "800BAE90",
+   "800BACF0",
+   "800BAD10",
+   "800F6580",
+   "800F6620",
+   "800F6680",
+   "800F6720",
+   "800BAE60",
+   "800BAE50",
+   "800BAE40",
+   "800BAE00",
+   "800BADF0",
+   "800BADE0",
+   "800BAE20",
+   "800BAD70",
+   "800F67F0",
+   "800F6840",
+   "800BAE80",
+   "800BAE70",
+   "800BAE30"
+  ]
+ },
+ "nw4r::snd::MemoryFileSoundArchive::MemoryFileStream@80254C88": {
+  "ctor_candidates": [
+   "800B99A0",
+   "800B9A10"
+  ],
+  "slots": [
+   "800B9A10",
+   "800BA790",
+   "800BA840",
+   "800BAC60",
+   "800BA8F0",
+   "800BA950"
+  ]
+ },
+ "MPointAnime@8025D7F0": {
+  "ctor_candidates": [
+   "80116060"
+  ],
+  "slots": [
+   "80116430",
+   "80115680",
+   "8013A560",
+   "801160F0"
+  ]
+ },
+ "MAnime@8025D838": {
+  "ctor_candidates": [
+   "80116470"
+  ],
+  "slots": [
+   "801164B0",
+   "8013AF90",
+   "8013B070",
+   "8013B060",
+   "pure"
+  ]
+ },
+ "MChipLayerSourceVertexColorModulator@8025D9E8": {
+  "ctor_candidates": [
+   "801167E0",
+   "801176C0"
+  ],
+  "slots": [
+   "801176C0",
+   "8013AF90",
+   "8013FC60",
+   "80117E70"
+  ]
+ },
+ "std::ios_base@8025DEC0": {
+  "ctor_candidates": [
+   "8011CF80",
+   "8011D5A0"
+  ],
+  "slots": [
+   "8011D5A0",
+   "8014A6F0",
+   "8013A560",
+   "8011D610"
+  ]
+ },
+ "MBgCallTask0<MFileReadTask>@8025DF08": {
+  "ctor_candidates": [
+   "8011C950",
+   "8011C9F0"
+  ],
+  "slots": [
+   "8011C9F0",
+   "8013AF90",
+   "8013B070",
+   "8011CF50",
+   "8011D160",
+   "8011D170",
+   "8011D180",
+   "pure",
+   "pure",
+   "pure"
+  ]
+ },
+ "MFont@8025E298": {
+  "ctor_candidates": [
+   "8011EF60",
+   "8011EFF0"
+  ],
+  "slots": [
+   "8011EFF0",
+   "8013AF90",
+   "8011F380",
+   "8013BA80",
+   "8011F330",
+   "8011F350",
+   "8013BB40",
+   "8013BB50",
+   "8013B990",
+   "8011F360",
+   "8011F370"
+  ]
+ },
+ "MIndicator@8025E300": {
+  "ctor_candidates": [
+   "8011F9C0"
+  ],
+  "slots": [
+   "8011FF50",
+   "8011F960",
+   "8013A560"
+  ]
+ },
+ "MLooperClock@8025E330": {
+  "ctor_candidates": [
+   "8011F820"
+  ],
+  "slots": [
+   "8011FF10",
+   "8011F7F0",
+   "8013A560"
+  ]
+ },
+ "MLooperPostLoopHookClock@8025E36C": {
+  "ctor_candidates": [
+   "8011F6B0"
+  ],
+  "slots": [
+   "8011FED0",
+   "8011F680",
+   "8013A560"
+  ]
+ },
+ "MLooperPreLoopHookClock@8025E3A4": {
+  "ctor_candidates": [
+   "8011F4A0"
+  ],
+  "slots": [
+   "8011FE90",
+   "8011F470",
+   "8013A560"
+  ]
+ },
+ "MLooper@8025E3E8": {
+  "ctor_candidates": [
+   "8011F8D0"
+  ],
+  "slots": [
+   "8011F8D0",
+   "pure"
+  ]
+ },
+ "MLooperPostLoopHook@8025E410": {
+  "ctor_candidates": [
+   "8011F760"
+  ],
+  "slots": [
+   "8011F760",
+   "pure"
+  ]
+ },
+ "MDialogFactory@8025E438": {
+  "ctor_candidates": [
+   "8011F5F0"
+  ],
+  "slots": [
+   "8011F5F0",
+   "pure",
+   "pure"
+  ]
+ },
+ "MLooperPreLoopHook@8025E488": {
+  "ctor_candidates": [
+   "80120C40",
+   "801215C0"
+  ],
+  "slots": [
+   "801215C0",
+   "8014A6F0",
+   "8013A560",
+   "80121630"
+  ]
+ },
+ "MBgCallTask0<MMenu>@8025E4C8": {
+  "ctor_candidates": [
+   "8011FF90"
+  ],
+  "slots": [
+   "80121BF0",
+   "8013AF90",
+   "8013B070",
+   "80120040",
+   "pure",
+   "80120010",
+   "80120020",
+   "80120000"
+  ]
+ },
+ "MMotionColorWeightAnime@8025E8E8": {
+  "ctor_candidates": [
+   "80135030"
+  ],
+  "slots": [
+   "801373A0",
+   "80115680",
+   "8013A560",
+   "801352A0"
+  ]
+ },
+ "DrcMotionPlayer::PlayTask@8025EAF0": {
+  "ctor_candidates": [
+   "80124420",
+   "80124B00"
+  ],
+  "slots": [
+   "80124420",
+   "8012C560"
+  ]
+ },
+ "DrcEntry@8025EB10": {
+  "ctor_candidates": [
+   "80121C70",
+   "80121CE0"
+  ],
+  "slots": [
+   "80121CE0",
+   "801240B0",
+   "80141170",
+   "801241F0",
+   "80124200"
+  ]
+ },
+ "MObjLayer@8025EF48": {
+  "ctor_candidates": [
+   "80139230",
+   "80139390"
+  ],
+  "slots": [
+   "80139230",
+   "801392A0"
+  ]
+ },
+ "MSeedGenerator@8025EFD8": {
+  "ctor_candidates": [
+   "8013AA90"
+  ],
+  "slots": [
+   "8013B280",
+   "8013B0F0",
+   "8013A560"
+  ]
+ },
+ "MTaskSetWaitEmptyTask@8025F010": {
+  "ctor_candidates": [
+   "8013AA00"
+  ],
+  "slots": [
+   "8013B240",
+   "8013B180",
+   "8013A560"
+  ]
+ },
+ "MCallTask0<MTaskSet, MTaskSet>@8025F050": {
+  "ctor_candidates": [
+   "8013A3B0",
+   "8013A440",
+   "8013A4D0",
+   "8013A570",
+   "8013A600"
+  ],
+  "slots": [
+   "8013B200",
+   "8013B1C0",
+   "8013A560"
+  ]
+ },
+ "CTERestrictProcessor@8025F090": {
+  "ctor_candidates": [
+   "8013AEB0"
+  ],
+  "slots": [
+   "80008EB0",
+   "8013AF90",
+   "8013B070",
+   "8013B060"
+  ]
+ },
+ "MCallTask0<MTask, MTask>@8025F0A8": {
+  "ctor_candidates": [
+   "8000E680",
+   "80034BB0",
+   "80035A10",
+   "8005C520",
+   "8005F010",
+   "8005FE50",
+   "80064110",
+   "800663B0",
+   "80067580",
+   "80073820",
+   "800AEBE0",
+   "800B11D0",
+   "800B12C0",
+   "800B1490",
+   "801483A0",
+   "80148BF0",
+   "80148EF0",
+   "801491F0",
+   "8014B4E0"
+  ],
+  "slots": [
+   "80008F20",
+   "8013ACD0",
+   "8013AE10"
+  ]
+ },
+ "MParallelTaskSet@8025F0E4": {
+  "ctor_candidates": [
+   "8000E750",
+   "8001D9B0",
+   "8002C280",
+   "8002DB90",
+   "80049C80",
+   "80054030",
+   "80054460",
+   "80056570",
+   "8005A790",
+   "8005B330",
+   "800628F0",
+   "8006A510",
+   "8006C470",
+   "8006E950",
+   "80076870",
+   "80077C30",
+   "8007CF30",
+   "8007D860",
+   "800801D0",
+   "800A2EA0",
+   "800A7180",
+   "800AE3F0",
+   "800B3E50",
+   "800B4C80"
+  ],
+  "slots": [
+   "80008F80",
+   "8013AAF0",
+   "8013AC30"
+  ]
+ },
+ "MOpacityVertexColorModulator@8025F180": {
+  "ctor_candidates": [
+   "8013B350"
+  ],
+  "slots": [
+   "80010D10",
+   "8013B530"
+  ]
+ },
+ "MConsole@8025F1E0": {
+  "ctor_candidates": [
+   "8013BA90",
+   "8013BAF0"
+  ],
+  "slots": [
+   "80118740",
+   "8013AF90",
+   "8013B070",
+   "8013BA80",
+   "pure",
+   "pure",
+   "8013BB40",
+   "8013BB50",
+   "8013B990"
+  ]
+ },
+ "M2DCameraLocator@8025F50C": {
+  "ctor_candidates": [
+   "8013F220"
+  ],
+  "slots": [
+   "8013FBA0",
+   "8013ACD0",
+   "8013F2A0"
+  ]
+ },
+ "MBgCallTask0<MBackupWriteTask>@8025FA98": {
+  "ctor_candidates": [
+   "80149E40"
+  ],
+  "slots": [
+   "80149E40",
+   "8014A6F0",
+   "8013A560",
+   "80149EB0"
+  ]
+ },
+ "MBgCallTask0<MBackupReadTask>@8025FAE8": {
+  "ctor_candidates": [
+   "80149EE0"
+  ],
+  "slots": [
+   "80149EE0",
+   "8014A6F0",
+   "8013A560",
+   "80149F50"
+  ]
+ },
+ "MBgCallTask0<MBackupInitTask>@8025FB38": {
+  "ctor_candidates": [
+   "80149F80"
+  ],
+  "slots": [
+   "80149F80",
+   "8014A6F0",
+   "8013A560",
+   "80149FF0"
+  ]
+ },
+ "MBgCallTask0<MBackupTask>@8025FB80": {
+  "ctor_candidates": [
+   "80149150"
+  ],
+  "slots": [
+   "8014A140",
+   "8013AF90",
+   "8013B070",
+   "80147190",
+   "801491F0"
+  ]
+ },
+ "MBackupWriteTask@8025FBCC": {
+  "ctor_candidates": [
+   "80148E50"
+  ],
+  "slots": [
+   "8014A0B0",
+   "8013AF90",
+   "8013B070",
+   "80147190",
+   "80148EF0"
+  ]
+ },
+ "MBackupReadTask@8025FC14": {
+  "ctor_candidates": [
+   "80148B50"
+  ],
+  "slots": [
+   "8014A020",
+   "8013AF90",
+   "8013B070",
+   "80147190",
+   "80148BF0"
+  ]
+ },
+ "MBackupInitTask@8025FC5C": {
+  "ctor_candidates": [
+   "80147100",
+   "8014A020",
+   "8014A0B0",
+   "8014A140"
+  ],
+  "slots": [
+   "80147100",
+   "8013AF90",
+   "8013B070",
+   "80147190",
+   "pure"
+  ]
+ },
+ "MBackupTask@8025FDF8": {
+  "ctor_candidates": [
+   "8014A350"
+  ],
+  "slots": [
+   "8014A810",
+   "8014A280"
+  ]
+ },
+ "MCNTFileReadTaskFactory@80260498": {
+  "ctor_candidates": [
+   "8014A9E0",
+   "8014B140",
+   "8014B460",
+   "8014C790"
+  ],
+  "slots": [
+   "8014B140",
+   "8013AF90",
+   "8013B070",
+   "8011CF50",
+   "8014B1E0",
+   "8014B240",
+   "8011D180",
+   "8014B280",
+   "8014B330",
+   "801604D0"
+  ]
+ },
+ "MResetKeyHook@80260748": {
+  "ctor_candidates": [
+   "8014F750"
+  ],
+  "slots": [
+   "80151130",
+   "8013AF90",
+   "8013B070",
+   "80120C10",
+   "8014F9C0",
+   "8014FFB0",
+   "80120150",
+   "80120140",
+   "801500B0",
+   "pure"
+  ]
+ },
+ "MCommonYesNoDialogMenu@80260810": {
+  "ctor_candidates": [
+   "8014E340"
+  ],
+  "slots": [
+   "80150D50",
+   "8013AF90",
+   "8013B070",
+   "80120040",
+   "8014E480",
+   "8014E4A0",
+   "80120020",
+   "80120000"
+  ]
+ },
+ "MCommonMsg@802608CC": {
+  "ctor_candidates": [
+   "8014DE30"
+  ],
+  "slots": [
+   "80150C50",
+   "8013AF90",
+   "8014D680",
+   "8013BA80",
+   "8014D350",
+   "8014D3B0",
+   "8014D410",
+   "8014D440",
+   "8013B990",
+   "8014D480",
+   "8014D490"
+  ]
+ },
+ "MCommonFrame@8026092C": {
+  "ctor_candidates": [
+   "8014F4A0",
+   "80150320"
+  ],
+  "slots": [
+   "80150BD0",
+   "8013AF90",
+   "8014D180",
+   "8013BA80",
+   "8014D130",
+   "8014D150",
+   "8013BB40",
+   "8013BB50",
+   "8013B990",
+   "8014D160",
+   "8014D170"
+  ]
+ },
+ "DrcDialogFactory@80260994": {
+  "ctor_candidates": [
+   "800B4A40"
+  ],
+  "slots": [
+   "801504B0",
+   "801505B0",
+   "80150810",
+   "80150940",
+   "80150950"
+  ]
+ },
+ "MCommonCursor@802609B0": {
+  "ctor_candidates": [
+   "80150100"
+  ],
+  "slots": [
+   "80150AD0",
+   "8013AF90",
+   "8013B070",
+   "80150320"
+  ]
+ },
+ "MCommonChoiceDialog@802609F0": {
+  "ctor_candidates": [
+   "8014F300"
+  ],
+  "slots": [
+   "80150A00",
+   "8013AF90",
+   "8013B070",
+   "8014F4A0"
+  ]
+ },
+ "MCommonYesNoDialog@80260A30": {
+  "ctor_candidates": [
+   "8014E4B0"
+  ],
+  "slots": [
+   "80150960",
+   "8013AF90",
+   "8014E590",
+   "8014E630"
+  ]
+ },
+ "MTemporaryScreenTexView@80260BE4": {
+  "ctor_candidates": [
+   "80153870",
+   "801539A0"
+  ],
+  "slots": [
+   "801539A0",
+   "80153E70",
+   "80154500"
+  ]
+ },
+ "MTemporaryScreenTask@80260C1C": {
+  "ctor_candidates": [
+   "80151550"
+  ],
+  "slots": [
+   "801551C0",
+   "801525A0"
+  ]
+ },
+ "MDisplay@80260D30": {
+  "ctor_candidates": [
+   "80155330",
+   "80155420"
+  ],
+  "slots": [
+   "80155420",
+   "801557C0",
+   "80155830",
+   "80155BD0",
+   "8011D710",
+   "80155D10",
+   "80155BE0",
+   "80155D00"
+  ]
+ },
+ "MWhiteFadeOutTask@80260DF8": {
+  "ctor_candidates": [
+   "80156AC0"
+  ],
+  "slots": [
+   "80156C80",
+   "80115680",
+   "80156770",
+   "801160F0"
+  ]
+ },
+ "MBlackFadeOutTask@80260E48": {
+  "ctor_candidates": [
+   "801569C0"
+  ],
+  "slots": [
+   "80156C40",
+   "80115680",
+   "80156770",
+   "801160F0"
+  ]
+ },
+ "MFileReadTaskFactory@802610E8": {
+  "ctor_candidates": [
+   "80156D80"
+  ],
+  "slots": [
+   "8014A920",
+   "8013AF90",
+   "80156E70",
+   "80156E40"
+  ]
+ },
+ "GrSound@80261160": {
+  "ctor_candidates": [
+   "80157CF0",
+   "80158020"
+  ],
+  "slots": [
+   "80158020",
+   "pure",
+   "pure"
+  ]
+ },
+ "DrcDialogInput@802612A0": {
+  "ctor_candidates": [
+   "8015AAC0",
+   "8015AB50"
+  ],
+  "slots": [
+   "8015AB50",
+   "8000BCB0",
+   "8013A560"
+  ]
+ },
+ "MSingleInputHub@802612D8": {
+  "ctor_candidates": [
+   "801594C0",
+   "80159560"
+  ],
+  "slots": [
+   "80159560",
+   "8000BCB0",
+   "8013A560"
+  ]
+ },
+ "MInputPADInterface@8026130C": {
+  "ctor_candidates": [
+   "801591D0",
+   "80159220"
+  ],
+  "slots": [
+   "80159220",
+   "80159290",
+   "8013A560"
+  ]
+ },
+ "MRestartTask@802614F0": {
+  "ctor_candidates": [
+   "8015EAB0",
+   "8015ED10"
+  ],
+  "slots": [
+   "8015EAB0",
+   "80115680",
+   "8015EB60",
+   "801160F0"
+  ]
+ },
+ "MReturnToDataManagerTask@80261540": {
+  "ctor_candidates": [
+   "8015E760",
+   "8015EA00"
+  ],
+  "slots": [
+   "8015E760",
+   "80115680",
+   "8015E850",
+   "801160F0"
+  ]
+ },
+ "MHBMDriver@80261588": {
+  "ctor_candidates": [
+   "8015FCE0",
+   "80160110"
+  ],
+  "slots": [
+   "pure"
+  ]
+ },
+ "MShutdownSystemHook@80261594": {
+  "ctor_candidates": [
+   "8015F6F0",
+   "8015FB40"
+  ],
+  "slots": [
+   "pure"
+  ]
+ },
+ "MPowerKeyHook@802615A0": {
+  "ctor_candidates": [
+   "8015F100",
+   "8015F550"
+  ],
+  "slots": [
+   "pure",
+   "pure"
+  ]
+ },
+ "std::basic_streambuf<char, std::char_traits<char>>@802841CC": {
+  "ctor_candidates": [
+   "802168AC"
+  ],
+  "slots": [
+   "802168AC"
+  ]
+ }
+}

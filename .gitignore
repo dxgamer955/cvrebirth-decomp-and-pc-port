@@ -1,0 +1,44 @@
+# Material original con copyright: nunca se versiona.
+/Castlevania/
+/orig/
+/assets/
+/build/
+/target/
+
+# Herramientas de terceros clonadas localmente (DolRecomp, ModernGekko-Template):
+# cada una es su propio repo con su propia historia, no se anidan aqui.
+/tools/
+
+# Artefactos locales de otras apps (Claude Code, Syncthing), no son parte del proyecto.
+/.claude/
+/.stfolder/
+
+# Salida de dtk (desensamblado del original, derivado de material con copyright).
+/decomp/*/build/
+/decomp/*/ghidra*/
+/decomp/game/pseudo_c/
+
+__pycache__/
+*.pyc
+
+# Salida del elevador automatico (derivada de game.dol): se regenera con decomp/tools/lift.py.
+/src/auto/lifted/
+/tests/difftest/lift_cases.py
+
+# Runtime nativo: codigo elevado generado desde game.dol y binarios.
+/runtime/gen/
+/runtime/build/
+
+/runtime/nand/
+
+# Ajustes locales del menu F3 del runtime nativo.
+/runtime/settings.cfg
+/runtime/build-win/
+/runtime/log-win.txt
+/runtime/log-win-*.txt
+/runtime/build-win-o1/
+
+# Generado desde game.dol por decomp/tools/trivial.py y las pruebas: no se versiona.
+/src/auto/
+/tests/difftest/auto_cases.py
+/tests/difftest/lift_status.txt

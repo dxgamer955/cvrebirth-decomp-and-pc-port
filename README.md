@@ -4,7 +4,7 @@
 
 > **Status: work in progress.** This repository hosts the tools and the native runtime of a PC port of
 > *Castlevania: The Adventure ReBirth* (WiiWare, 2009), and the readable, documented decompilation that is being
-> written on top of it. The port runs the game up to Stage 1; run `build.sh` (or `build.bat` on Windows) with your own WAD to build it; see [BUILD.md](BUILD.md).
+> written on top of it. The port runs the game up to Stage 1; copy your own `.wad` next to `build.sh` and run it (`build.bat` on Windows) to build it; see [BUILD.md](BUILD.md).
 
 ## What is this project?
 
@@ -87,7 +87,7 @@ Issues and pull requests (function naming, documentation, bug reports) are welco
 
 > **Estado: trabajo en curso.** Este repositorio aloja las herramientas y el runtime nativo de un port para PC de
 > *Castlevania: The Adventure ReBirth* (WiiWare, 2009), y la decompilación legible y documentada que se escribe
-> encima. El port ejecuta el juego hasta el Stage 1; ejecuta `build.sh` (o `build.bat` en Windows) con tu propio WAD para compilarlo; mira [BUILD.md](BUILD.md).
+> encima. El port ejecuta el juego hasta el Stage 1; copia tu propio `.wad` junto a `build.sh` y ejecútalo (`build.bat` en Windows) para compilarlo; mira [BUILD.md](BUILD.md).
 
 ### ¿Qué es este proyecto?
 

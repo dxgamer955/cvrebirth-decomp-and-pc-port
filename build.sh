@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-# Compila el port nativo a PC de principio a fin a partir de TU copia del juego (Linux o MSYS2 UCRT64 en Windows).
+# Builds the native PC port end to end from YOUR copy of the game (Linux, or the MSYS2 UCRT64 shell on Windows).
 #
-#   ./build.sh [juego.wad | carpeta_con_los_.app] [opciones]
+#   ./build.sh [game.wad | folder_with_the_.app_files] [options]
 #
-#   juego.wad       tu WAD de Castlevania: The Adventure ReBirth (se desencripta con libWiiPy)
-#   carpeta         o la carpeta de contenido ya desencriptada (p. ej. la de la NAND de Dolphin)
-#   (sin argumento) usa orig/game.dol y orig/files si ya existen
-#   --install-deps  instala con el gestor de paquetes lo que falte (pacman en MSYS2; en Linux solo muestra el comando)
-#   --opt=-O2       nivel de optimizacion (por defecto -O2 en Windows y -O1 en Linux)
-#   -jN             trabajos de make (por defecto: todos los nucleos)
-#   --run           ejecuta el juego al terminar
+#   game.wad        path to your WAD of Castlevania: The Adventure ReBirth (decrypted with libWiiPy). Use quotes if the path has spaces.
+#                   If you omit it, the script looks for a *.wad next to this script or in orig/
+#   folder          or a folder with the already decrypted content (for example Dolphin's NAND content folder)
+#   (no argument)   uses orig/game.dol and orig/files if they already exist, otherwise looks for a .wad as described above
+#   --install-deps  install what is missing with the package manager (pacman on MSYS2; on Linux it only prints the command)
+#   --opt=-O2       optimization level (default: -O2 on Windows, -O1 on Linux)
+#   -jN             make jobs (default: all cores)
+#   --run           run the game when the build finishes
 #
-# Resultado: runtime/build/castlevania (Linux) o runtime/build-win/castlevania.exe (Windows).
+# Result: runtime/build/castlevania (Linux) or runtime/build-win/castlevania.exe (Windows).
 set -e
 cd "$(dirname "$0")"
 ROOT="$PWD"
@@ -22,7 +23,7 @@ for a in "$@"; do
     --opt=*) OPT="${a#--opt=}" ;;
     -j*) JOBS="${a#-j}" ;;
     --run) RUN=1 ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
     *) SRC="$a" ;;
   esac
 done
@@ -32,14 +33,14 @@ die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 MSYS=0; case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) MSYS=1 ;; esac
 if [ "$MSYS" = 1 ] && [ -n "$SRC" ] && command -v cygpath >/dev/null; then SRC="$(cygpath -u "$SRC")"; fi
 
-# ---- 1. herramientas ----------------------------------------------------------------------------------------------
-say "Comprobando herramientas"
+# ---- 1. tools -----------------------------------------------------------------------------------------------------
+say "Checking tools"
 missing=()
 for t in python3 make g++ pkg-config; do
   if [ "$MSYS" = 1 ] && [ "$t" = python3 ]; then command -v python >/dev/null || missing+=(python); else command -v "$t" >/dev/null || missing+=("$t"); fi
 done
 if [ "$MSYS" = 1 ]; then
-  # Se comprueban comandos y modulos reales (los paquetes pueden llamarse distinto segun la instalacion)
+  # Check real commands and modules (the package names can differ between installations)
   P=mingw-w64-ucrt-x86_64
   need=""
   command -v g++ >/dev/null || need="$need $P-gcc"
@@ -50,19 +51,19 @@ if [ "$MSYS" = 1 ]; then
   pkg-config --exists glew 2>/dev/null || need="$need $P-glew"
   if command -v python >/dev/null; then
     python -c "import PIL" 2>/dev/null || need="$need $P-python-pillow"
-    if [ -f "$SRC" ]; then python -c "import Crypto" 2>/dev/null || need="$need $P-python-pycryptodome"; python -c "import requests" 2>/dev/null || need="$need $P-python-requests"; fi   # libWiiPy (solo con un WAD)
+    if [ -f "$SRC" ]; then python -c "import Crypto" 2>/dev/null || need="$need $P-python-pycryptodome"; python -c "import requests" 2>/dev/null || need="$need $P-python-requests"; fi   # libWiiPy (only needed with a WAD)
   fi
   if [ -n "$need" ]; then
-    if [ "$INSTALL" = 1 ]; then say "Instalando con pacman:$need"; pacman -S --needed --noconfirm $need
-    else die "faltan en MSYS2:$need
-Instalalos con: pacman -S --needed$need
-(o vuelve a ejecutar con --install-deps)"; fi
+    if [ "$INSTALL" = 1 ]; then say "Installing with pacman:$need"; pacman -S --needed --noconfirm $need
+    else die "missing in MSYS2:$need
+Install them with: pacman -S --needed$need
+(or run again with --install-deps)"; fi
   fi
 else
-  pkg-config --exists sdl2 glew gl 2>/dev/null || missing+=("SDL2/GLEW/OpenGL (paquetes de desarrollo)")
+  pkg-config --exists sdl2 glew gl 2>/dev/null || missing+=("SDL2/GLEW/OpenGL (development packages)")
   python3 -c "import PIL" 2>/dev/null || python3 -c "import venv" 2>/dev/null || missing+=("python3-venv")
   if [ ${#missing[@]} -gt 0 ]; then
-    die "faltan: ${missing[*]}
+    die "missing: ${missing[*]}
 Arch:   sudo pacman -S --needed base-devel python-pillow sdl2 glew
 Debian: sudo apt install build-essential pkg-config python3-venv libsdl2-dev libglew-dev
 Fedora: sudo dnf install gcc-c++ make pkgconf python3 SDL2-devel glew-devel mesa-libGL-devel"
@@ -70,33 +71,38 @@ Fedora: sudo dnf install gcc-c++ make pkgconf python3 SDL2-devel glew-devel mesa
 fi
 PY=python3; [ "$MSYS" = 1 ] && PY=python
 
-# ---- 2. entorno de Python (libWiiPy para el WAD, Pillow para la fuente) ------------------------------------------------
+# If no WAD was given and the game is not extracted yet, look for a .wad next to this script or in orig/
+if [ -z "$SRC" ] && { [ ! -f orig/game.dol ] || [ ! -d orig/files ]; }; then
+  for f in ./*.wad orig/*.wad; do [ -f "$f" ] && { SRC="$f"; say "Found a WAD: $f"; break; }; done
+fi
+
+# ---- 2. Python environment (libWiiPy for the WAD, Pillow for the font) and game extraction -------------------------------
 if [ ! -f orig/game.dol ] || [ ! -d orig/files ]; then
-  [ -n "$SRC" ] || die "no hay orig/game.dol ni orig/files: indica tu WAD, por ejemplo  ./build.sh \"Castlevania.wad\""
-  say "Preparando el entorno de Python (.venv)"
+  [ -n "$SRC" ] || die "no game found. Put your .wad in this folder (next to build.sh) and run ./build.sh again, or pass its path:  ./build.sh \"/path/to/game.wad\""
+  say "Preparing the Python environment (.venv)"
   [ -d .venv ] || $PY -m venv --system-site-packages .venv
   VPY=.venv/bin/python; [ -x "$VPY" ] || VPY=.venv/Scripts/python.exe
   if [ -f "$SRC" ]; then "$VPY" -c "import libWiiPy" 2>/dev/null || "$VPY" -m pip install --quiet libWiiPy; fi
-  say "Extrayendo el juego de: $SRC"
+  say "Extracting the game from: $SRC"
   "$VPY" decomp/tools/prepare_game.py "$SRC" orig
 else
-  say "orig/game.dol y orig/files ya existen: se omite la extraccion"
+  say "orig/game.dol and orig/files already exist: skipping extraction"
 fi
 "$PY" -c "import PIL" 2>/dev/null || { [ -d .venv ] || $PY -m venv --system-site-packages .venv; VPY=.venv/bin/python; [ -x "$VPY" ] || VPY=.venv/Scripts/python.exe; "$VPY" -m pip install --quiet Pillow; PY="$VPY"; }
 
-# ---- 3. firmas de funciones: sigs.json (incluido en el repositorio) o la exportacion de Ghidra ----------------------------
+# ---- 3. function signatures: sigs.json (shipped in the repository) or a Ghidra export -------------------------------------
 if [ ! -f decomp/game/pseudo_c/all.c ] && [ ! -f decomp/game/config/sigs.json ]; then
-  die "falta decomp/game/config/sigs.json; exporta el pseudo-C con Ghidra (ver BUILD.md) o actualiza el repositorio"
+  die "decomp/game/config/sigs.json is missing; export the pseudo-C with Ghidra (see BUILD.md) or update the repository"
 fi
 
-# ---- 4. traducir game.dol a C++ -----------------------------------------------------------------------------------------
-say "Traduciendo game.dol a C++ (runtime/gen)"
+# ---- 4. translate game.dol to C++ ----------------------------------------------------------------------------------------
+say "Translating game.dol to C++ (runtime/gen)"
 "$PY" decomp/tools/lift_native.py > /dev/null
-say "Generando la fuente del sistema"
+say "Generating the system font"
 "$PY" scripts/make_osfont.py
 
-# ---- 5. compilar --------------------------------------------------------------------------------------------------------
-say "Compilando (-j$JOBS)"
+# ---- 5. build ------------------------------------------------------------------------------------------------------------
+say "Building (-j$JOBS)"
 cd runtime
 if [ -n "$OPT" ]; then make -j"$JOBS" OPT="$OPT"; else make -j"$JOBS"; fi
 if [ "$MSYS" = 1 ]; then
@@ -105,9 +111,9 @@ if [ "$MSYS" = 1 ]; then
 else
   EXE=build/castlevania
 fi
-[ -f "$EXE" ] || die "no se genero $EXE"
+[ -f "$EXE" ] || die "$EXE was not produced"
 
-say "Listo: runtime/$EXE"
-if [ "$MSYS" = 1 ]; then echo "Ejecuta:  runtime\\play-windows.bat"; else echo "Ejecuta:  cd runtime && ./build/castlevania ../orig/game.dol"; fi
-echo "Controles y opciones: BUILD.md (F3 abre el menu de ajustes)."
+say "Done: runtime/$EXE"
+if [ "$MSYS" = 1 ]; then echo "Run:  runtime\\play-windows.bat"; else echo "Run:  cd runtime && ./build/castlevania ../orig/game.dol"; fi
+echo "Controls and options: BUILD.md (F3 opens the settings menu)."
 if [ "$RUN" = 1 ]; then exec "./$EXE" ../orig/game.dol; fi

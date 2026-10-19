@@ -1,12 +1,12 @@
 @echo off
-rem Compila el port nativo a PC (castlevania.exe) de principio a fin a partir de TU copia del juego.
+rem Builds the native PC port (castlevania.exe) end to end from YOUR copy of the game.
 rem
-rem   build.bat "C:\ruta\juego.wad"        (tambien puedes arrastrar el WAD sobre este archivo)
-rem   build.bat                             si orig\game.dol y orig\files ya existen
-rem   build.bat "juego.wad" --install-deps  instala con pacman lo que falte en MSYS2
-rem   build.bat "juego.wad" --run           ejecuta el juego al terminar
+rem   build.bat "C:\path\game.wad"          (you can also drag the WAD onto this file)
+rem   build.bat                              looks for a .wad next to this file (or in orig\), or uses orig\game.dol if it exists
+rem   build.bat "game.wad" --install-deps    install what is missing with pacman in MSYS2
+rem   build.bat "game.wad" --run             run the game when the build finishes
 rem
-rem Hace falta MSYS2 (https://www.msys2.org). Este archivo solo lo localiza y llama a build.sh dentro de su terminal UCRT64.
+rem Requires MSYS2 (https://www.msys2.org). This file only locates it and calls build.sh inside its UCRT64 shell.
 setlocal
 cd /d "%~dp0"
 
@@ -14,13 +14,13 @@ set "MSYS2="
 if defined MSYS2_ROOT if exist "%MSYS2_ROOT%\usr\bin\bash.exe" set "MSYS2=%MSYS2_ROOT%"
 if not defined MSYS2 for %%D in (C D E F) do if exist "%%D:\msys64\usr\bin\bash.exe" if not defined MSYS2 set "MSYS2=%%D:\msys64"
 if not defined MSYS2 (
-  echo No se encontro MSYS2. Instalalo desde https://www.msys2.org y vuelve a ejecutar este archivo.
-  echo Si lo instalaste en otra carpeta, define la variable MSYS2_ROOT con esa ruta.
+  echo MSYS2 was not found. Install it from https://www.msys2.org and run this file again.
+  echo If it is installed somewhere else, set the MSYS2_ROOT variable to that folder.
   pause
   exit /b 1
 )
 
-rem El primer argumento (si no empieza por -) es el WAD o la carpeta de contenido; el resto son opciones de build.sh
+rem The first argument (if it does not start with -) is the WAD or the content folder; the rest are build.sh options
 set "RT_WAD="
 set "OPTS="
 :args
@@ -36,10 +36,10 @@ set CHERE_INVOKING=1
 "%MSYS2%\usr\bin\bash.exe" -lc "./build.sh%OPTS%"
 if errorlevel 1 (
   echo.
-  echo La compilacion fallo. Revisa los mensajes de arriba.
+  echo The build failed. Check the messages above.
   pause
   exit /b 1
 )
 echo.
-echo Listo. Ejecuta runtime\play-windows.bat
+echo Done. Run runtime\play-windows.bat
 pause

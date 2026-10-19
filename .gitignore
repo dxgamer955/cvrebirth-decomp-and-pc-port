@@ -40,3 +40,6 @@ __pycache__/
 
 # Entorno de Python local de build.sh
 /.venv/
+
+# Your own copy of the game must never be committed
+*.wad

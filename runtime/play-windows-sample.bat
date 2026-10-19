@@ -1,5 +1,5 @@
 @echo off
-rem Perfilador de muestreo (RT_SAMPLE): al cerrar la ventana escribe en log-win-sample.txt donde se pierde el tiempo (normal vs fotogramas lentos).
+rem Sampling profiler (RT_SAMPLE): when you close the window it writes log-win-sample.txt, showing where the time goes (normal vs slow frames).
 cd /d "%~dp0"
 set RT_FPS=1
 set RT_SAMPLE=1

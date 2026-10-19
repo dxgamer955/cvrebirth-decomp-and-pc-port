@@ -1,5 +1,6 @@
-"""Clasifica funciones diminutas sin nombre (<= 0x20 bytes: vacias, devuelven una constante, leen/escriben un campo de r3) y propone nombres
-para renames.txt, las ejecutadas primero. Uso: classify_small.py [profile.log [cuantas]]  (el log es la salida de RT_PROFILE=1 RT_PROFILE_N=100000)."""
+"""Classifies tiny unnamed functions (<= 0x20 bytes: empty, return a constant, read/write a field of r3, jump to another function) and
+proposes names for renames.txt, the executed ones first. Usage: classify_small.py [profile.log [count]]
+(the log is the output of RT_PROFILE=1 RT_PROFILE_N=100000)."""
 import re,glob,collections,sys,os
 root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..')+'/'
 prof=sys.argv[1] if len(sys.argv)>1 else 'profile.log'
@@ -70,5 +71,5 @@ for k,b in bodies.items():
         if m: name=f'GetSDA13_{sdh(int(m.group(1),16))}_{a}'
     if name: out.append((counts.get(k,0),k,name,lines))
 out.sort(reverse=True)
-print(len(bodies),'pequenas con perfil;',len(out),'clasificadas',file=sys.stderr)
-for c,k,n,l in out[:int(sys.argv[2]) if len(sys.argv)>2 else 100]: print(f'{k} {n}  # tamano pequeno, {c} llamadas en la prueba')
+print(len(bodies),'tiny functions;',len(out),'classified',file=sys.stderr)
+for c,k,n,l in out[:int(sys.argv[2]) if len(sys.argv)>2 else 100]: print(f'{k} {n}  # tiny function, {c} calls in the test run')

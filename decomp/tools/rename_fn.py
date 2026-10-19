@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aplica decomp/game/config/renames.txt: sustituye cada fn_XXXXXXXX por su nombre legible en symbols.txt y en el codigo del runtime."""
+"""Applies decomp/game/config/renames.txt: replaces each fn_XXXXXXXX with its readable name in symbols.txt and in the runtime code."""
 import re, sys, pathlib
 root = pathlib.Path(__file__).resolve().parents[2]
 ren = {}
@@ -16,4 +16,4 @@ for t in targets:
     s = t.read_text()
     s2, n = pat.subn(lambda m: ren[m.group(1)], s)
     if n: t.write_text(s2); total += n; print(f"{t.relative_to(root)}: {n}")
-print(f"{total} sustituciones")
+print(f"{total} replacements")

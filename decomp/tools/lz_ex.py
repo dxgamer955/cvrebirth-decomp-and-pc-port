@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Descomprime formato Nintendo LZ77 (tipo 0x10) y LZ77 extendido (0x11). Uso: lz_ex.py in out"""
+"""Decompresses Nintendo LZ77 (type 0x10) and extended LZ77 (type 0x11). Usage: lz_ex.py in out"""
 import sys, struct
 def decompress(d):
     t = d[0]; size = d[1] | d[2] << 8 | d[3] << 16
@@ -30,4 +30,4 @@ if __name__ == "__main__":
     d = open(sys.argv[1], "rb").read()
     out, used = decompress(d)
     open(sys.argv[2], "wb").write(out)
-    print(f"tipo {d[0]:#x}, descomprimido {len(out)} bytes (consumidos {used}/{len(d)} del origen)")
+    print(f"type {d[0]:#x}, decompressed {len(out)} bytes (consumed {used}/{len(d)} of the input)")

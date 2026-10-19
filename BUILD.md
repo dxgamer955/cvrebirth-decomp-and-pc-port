@@ -9,19 +9,26 @@ translating **your** game executable into C++ on your own machine; that generate
 
 ## Quick start
 
-**Linux**
+You need your game as a `.wad` file. It can be anywhere on your computer, and there are two ways to give it to the script.
+
+**Option 1: put the WAD in the repository folder (easiest).** Copy your `.wad` next to `build.sh` (the top folder of this
+repository, the one that contains `README.md`). Any file name works. Then run the script with no arguments.
+The `.wad` is ignored by git, so it will never be committed by mistake.
 
 ```
-./build.sh "/path/to/Castlevania - The Adventure ReBirth (USA) (WiiWare).wad"
+./build.sh                       # Linux
+build.bat                        # Windows (double click it)
 ```
 
-**Windows**: install [MSYS2](https://www.msys2.org) once, then drag your `.wad` onto `build.bat` or run
+**Option 2: pass the path of the WAD.** Use quotes if the path has spaces.
 
 ```
-build.bat "C:\path\to\game.wad" --install-deps
+./build.sh "/home/me/Downloads/Castlevania - The Adventure ReBirth (USA) (WiiWare).wad"    # Linux
+build.bat "C:\Users\me\Downloads\game.wad"                                              # Windows (or drag the WAD onto build.bat)
 ```
 
-`--install-deps` lets the script install the missing MSYS2 packages with `pacman`.
+**Windows only**: install [MSYS2](https://www.msys2.org) once first. Add `--install-deps` (for example `build.bat --install-deps`)
+to let the script install the missing MSYS2 packages with `pacman`.
 
 The script does everything:
 
@@ -38,8 +45,7 @@ cd runtime && ./build/castlevania ../orig/game.dol     # Linux
 runtime\play-windows.bat                                # Windows
 ```
 
-Options: `--opt=-O2` (optimization level), `-jN` (parallel jobs), `--run` (start the game when done). If
-`orig/game.dol` and `orig/files/` already exist you can run the script without arguments. If you already have the
+Options: `--opt=-O2` (optimization level), `-jN` (parallel jobs), `--run` (start the game when done). If you already have the
 decrypted content folder (for example Dolphin's `Wii/title/00010001/<title id>/content/`), pass that folder instead of the WAD.
 
 The SHA-1 of the expected `game.dol` (US release) is `69795df60bdeae8faa8905f20f9c8af8455f3c53`; the script warns if yours differs.
@@ -118,10 +124,17 @@ el ejecutable de **tu** juego a C++ en tu máquina; ese código generado nunca s
 
 ## Inicio rápido
 
-**Linux:** `./build.sh "/ruta/a/tu/juego.wad"`
+Necesitas tu juego como archivo `.wad`. Puede estar en cualquier sitio y hay dos formas de dárselo al script.
 
-**Windows:** instala [MSYS2](https://www.msys2.org) una vez, y luego arrastra tu `.wad` sobre `build.bat` o ejecuta
-`build.bat "C:\ruta\juego.wad" --install-deps` (instala con `pacman` lo que falte).
+**Opción 1: copia el WAD a la carpeta del repositorio (lo más fácil).** Copia tu `.wad` junto a `build.sh` (la carpeta principal del
+repositorio, la que contiene `README.md`); cualquier nombre sirve. Luego ejecuta el script sin argumentos: `./build.sh` en Linux o
+`build.bat` en Windows (doble clic). El `.wad` está ignorado por git, así que nunca se sube por error.
+
+**Opción 2: indica la ruta del WAD**, entre comillas si tiene espacios: `./build.sh "/ruta/a/tu/juego.wad"` en Linux, o
+`build.bat "C:\ruta\juego.wad"` en Windows (también puedes arrastrar el WAD sobre `build.bat`).
+
+**Solo en Windows:** instala [MSYS2](https://www.msys2.org) una vez antes. Con `--install-deps` el script instala con `pacman` lo
+que falte.
 
 El script lo hace todo: desencripta el WAD (con el paquete de Python `libWiiPy`, en un `.venv` local; este repositorio no
 guarda ninguna clave), extrae `orig/game.dol` y `orig/files/`, traduce el juego a C++, genera la fuente del sistema y compila.

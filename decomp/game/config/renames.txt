@@ -1,11 +1,11 @@
-# Nombres legibles para funciones sin nombre (fn_XXXXXXXX). Formato: <fn_ADDR> <NombreNuevo>  # nota
-# Se aplican con: python3 decomp/tools/rename_fn.py   (reescribe symbols.txt, runtime/src, tests y PROGRESS.md; es idempotente)
-# Despues hay que regenerar el codigo elevado: python3 decomp/tools/lift_native.py && make -C runtime
-fn_80141030 Engine_WaitFrameTime        # limitador de fotogramas del motor (espera retrazados de VI hasta el siguiente paso de 60 Hz)
-fn_80189550 OSSwitchFiber               # llama a func(arg0..arg3) sobre otra pila
+# Readable names for unnamed functions (fn_XXXXXXXX). Format: <fn_ADDR> <NewName>  # note
+# Apply with: python3 decomp/tools/rename_fn.py   (rewrites symbols.txt, runtime/src, tests and PROGRESS.md; it is idempotent)
+# Then regenerate the translated code: python3 decomp/tools/lift_native.py && make -C runtime
+fn_80141030 Engine_WaitFrameTime        # engine frame limiter (waits for VI retraces until the next 60 Hz step)
+fn_80189550 OSSwitchFiber               # calls func(arg0..arg3) on another stack
 fn_8018D2C0 OSInitFont                  # OSInitFont(OSFontHeader*) -> TRUE
-fn_8019FEB0 GXDrawDone                  # envia PE_DONE y espera la interrupcion de fin
-fn_801ACFF0 __AI_SRC_INIT               # calibra el reloj de audio (AIS)
+fn_8019FEB0 GXDrawDone                  # sends PE_DONE and waits for the finish interrupt
+fn_801ACFF0 __AI_SRC_INIT               # calibrates the audio clock (AIS)
 fn_801BBC70 IOS_CloseAsync
 fn_801BBD30 IOS_Close
 fn_801BBDE0 IOS_ReadAsync
@@ -16,32 +16,32 @@ fn_801BC200 IOS_SeekAsync
 fn_801BC2E0 IOS_Seek
 fn_801BC510 IOS_Ioctl
 fn_801BC780 IOS_IoctlvAsync
-fn_801C1F50 BTE_EngineRun               # motor Bluetooth (BTE) del WPAD, disparado por una alarma
-fn_801CFC40 KPADReadEx                  # (canal, buffer, cuenta, &error): lectura del mando
-fn_801DC830 BTE_InitStack               # arranque de la pila Bluetooth
+fn_801C1F50 BTE_EngineRun               # Bluetooth engine (BTE) of WPAD, triggered by an alarm
+fn_801CFC40 KPADReadEx                  # (channel, buffer, count, &error): reads the controller
+fn_801DC830 BTE_InitStack               # Bluetooth stack start-up
 fn_800BB5D0 CNTInitHandle
 fn_800BB5E0 CNTReleaseHandle
 fn_800BB650 CNTOpen
 fn_800BB990 CNTRead
 fn_800BBAB0 CNTGetLength
 fn_800BBAE0 CNTClose
-# --- lote 2: las mas ejecutadas segun RT_PROFILE (identificadas leyendo el codigo elevado) ---
-fn_80190380 OSGetCurrentThread          # lee 0x800000E4
+# --- batch 2: the most executed ones according to RT_PROFILE (identified by reading the translated code) ---
+fn_80190380 OSGetCurrentThread          # reads 0x800000E4
 fn_8018E950 OSLockMutex
 fn_8018EA30 OSUnlockMutex
-fn_8020B164 div                         # div(numer, denom) -> {quot, rem} de MSL
-fn_801A0580 GXBegin                     # (primitiva, formato, nverts): escribe el comando de dibujo al FIFO
+fn_8020B164 div                         # div(numer, denom) -> {quot, rem} from MSL
+fn_801A0580 GXBegin                     # (primitive, format, nverts): writes the draw command to the FIFO
 fn_801A0300 __GXSetDirtyState
 fn_8000C910 Vec2_Copy                   # (dst, src)
-fn_8000C930 Vec2_Add                    # devuelve {x,y} por valor
+fn_8000C930 Vec2_Add                    # returns {x,y} by value
 fn_800388D0 Vec2_Scale                  # (vec, f1)
 fn_80143BA0 Vec2_Div                    # (vec, f1)
-fn_80142210 GXFifoWrite2F32             # escribe dos f32 en el FIFO (0xCC008000)
-fn_801422D0 GXFifoWrite2F32_B           # identica a la anterior
-fn_80142220 GXFifoWrite1U32             # escribe un u32 en el FIFO
+fn_80142210 GXFifoWrite2F32             # writes two f32 to the FIFO (0xCC008000)
+fn_801422D0 GXFifoWrite2F32_B           # identical to the previous one
+fn_80142220 GXFifoWrite1U32             # writes a u32 to the FIFO
 fn_8000C900 Vec2_Set                    # (dst, f1=x, f2=y)
-# --- lote 3: 100 funciones diminutas clasificadas automaticamente (Nop, devuelve constante, lee/escribe un campo de r3 en un desplazamiento) ---
-# Nombre = tipo + desplazamiento en hex + direccion (para que sea unico). Ver /decomp/tools/classify_small.py
+# --- batch 3: 100 tiny functions classified automatically (Nop, return a constant, read/write a field of r3 at an offset) ---
+# Name = kind + offset in hex + address (to keep it unique). See decomp/tools/classify_small.py
 fn_801900D0 Nop_801900D0
 fn_801296F0 GetU32_04_801296F0
 fn_80011A00 GetU32_04_80011A00
@@ -142,7 +142,7 @@ fn_8017D7C0 SetF32_4C_8017D7C0
 fn_8017D7B0 SetF32_50_8017D7B0
 fn_8017C5F0 ReturnConst_2_8017C5F0
 fn_8017B890 GetF32_30_8017B890
-# --- lote 4: funciones diminutas con mas patrones (saltos a otra funcion, direccion de campo, globales SDA, escritura de constante) ---
+# --- batch 4: tiny functions with more patterns (jumps to another function, field address, SDA globals, constant stores) ---
 fn_80216698 JumpTo_fn_8021644C_80216698
 fn_801AFF80 GetSDA13_m4B70_801AFF80
 fn_801AF710 GetSDA13_m4B60_801AF710
@@ -1119,17 +1119,17 @@ fn_80009BA0 JumpToField_FFFFFF90_fn_800098B0_80009BA0
 fn_80009540 Nop_80009540
 fn_80009530 Nop_80009530
 fn_80009520 Nop_80009520
-# --- lote 5: SDK de OS (hilos y mutex), verificadas leyendo el codigo elevado ---
-fn_8018E910 OSInitMutex                 # cola vacia, dueno y cuenta a 0
-fn_8018EB00 __OSUnlockAllMutex          # suelta todos los mutex de un hilo y despierta a los que esperan
-fn_80190410 UnsetRun                    # saca el hilo de la cola de listos
-fn_80190480 __OSGetEffectivePriority    # prioridad base o la mas alta de los hilos que esperan sus mutex
+# --- batch 5: OS SDK (threads and mutexes), verified by reading the translated code ---
+fn_8018E910 OSInitMutex                 # empty queue, owner and count set to 0
+fn_8018EB00 __OSUnlockAllMutex          # releases all the mutexes of a thread and wakes up the waiters
+fn_80190410 UnsetRun                    # removes the thread from the run queue
+fn_80190480 __OSGetEffectivePriority    # base priority or the highest one among the threads waiting for its mutexes
 fn_801904C0 SetEffectivePriority
 fn_80190670 __OSPromoteThread
-fn_80190910 OSCreateThread              # inicializa el contexto y el centinela de pila 0xDEAEBABE
-fn_80190B80 OSExitThread                # estado "moribundo", despierta a quien hace join y replanifica
+fn_80190910 OSCreateThread              # initializes the context and the 0xDEAEBABE stack sentinel
+fn_80190B80 OSExitThread                # "moribund" state, wakes whoever is joining and reschedules
 fn_80190E50 OSJoinThread
-fn_80190FA0 OSResumeThread              # decrementa la cuenta de suspension
-fn_80191240 OSSuspendThread             # incrementa la cuenta de suspension
-fn_801914C0 OSWakeupThread              # despierta a todos los hilos de una cola
-fn_801895B0 OSInitContext              # (contexto, pc, sp): pone los registros iniciales; lo llama OSCreateThread
+fn_80190FA0 OSResumeThread              # decrements the suspend count
+fn_80191240 OSSuspendThread             # increments the suspend count
+fn_801914C0 OSWakeupThread              # wakes up all the threads of a queue
+fn_801895B0 OSInitContext              # (context, pc, sp): sets the initial registers; called by OSCreateThread

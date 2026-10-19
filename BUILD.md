@@ -3,71 +3,60 @@
 > English | [Español](#espanol)
 
 This repository contains **no game data**. You need your own legally obtained copy of
-*Castlevania: The Adventure ReBirth* (WiiWare), extracted by you. The native runtime is built by
-translating **your** `game.dol` into C++ on your own machine; that generated code is never committed
+*Castlevania: The Adventure ReBirth* (WiiWare), as a `.wad` file. The native runtime is built by
+translating **your** game executable into C++ on your own machine; that generated code is never committed
 (it is listed in `.gitignore`).
 
-## 1. Your game files
+## Quick start
 
-Put them here (these folders are ignored by git):
+**Linux**
 
 ```
-orig/game.dol          the main executable (SHA-1 69795df60bdeae8faa8905f20f9c8af8455f3c53)
-orig/files/            the files of the game's content archive, extracted from your WAD
+./build.sh "/path/to/Castlevania - The Adventure ReBirth (USA) (WiiWare).wad"
 ```
 
-The runtime looks for the extracted files in `../orig/files` (relative to `runtime/`). You can point it
-elsewhere with the second command line argument or the `RT_FILES` environment variable.
+**Windows**: install [MSYS2](https://www.msys2.org) once, then drag your `.wad` onto `build.bat` or run
 
-## 2. Requirements
+```
+build.bat "C:\path\to\game.wad" --install-deps
+```
+
+`--install-deps` lets the script install the missing MSYS2 packages with `pacman`.
+
+The script does everything:
+
+1. decrypts the WAD (with the `libWiiPy` Python package, installed into a local `.venv`; no keys are stored in this repository),
+2. extracts `orig/game.dol` (the real executable, which is LZ77 compressed inside the WAD) and `orig/files/` (the game data, a U8 archive),
+3. translates `game.dol` to C++ (`runtime/gen/`),
+4. builds the system font from a free font on your machine, and
+5. compiles the runtime: `runtime/build/castlevania` on Linux, `runtime\build-win\castlevania.exe` on Windows.
+
+Then run it:
+
+```
+cd runtime && ./build/castlevania ../orig/game.dol     # Linux
+runtime\play-windows.bat                                # Windows
+```
+
+Options: `--opt=-O2` (optimization level), `-jN` (parallel jobs), `--run` (start the game when done). If
+`orig/game.dol` and `orig/files/` already exist you can run the script without arguments. If you already have the
+decrypted content folder (for example Dolphin's `Wii/title/00010001/<title id>/content/`), pass that folder instead of the WAD.
+
+The SHA-1 of the expected `game.dol` (US release) is `69795df60bdeae8faa8905f20f9c8af8455f3c53`; the script warns if yours differs.
+
+### Requirements
 
 | Tool | Used for |
 |------|----------|
-| Python 3 with Pillow | the translator and the helper that builds the system font |
-| Ghidra 12 (headless) and a JDK | one-off export of the decompiler output the translator uses for function signatures |
-| g++ or clang++ (C++17), make | the runtime |
+| Python 3 | the translator and the extraction scripts (Pillow is used for the font) |
+| g++ or clang++ (C++17), make, pkg-config | the runtime |
 | SDL2, GLEW, OpenGL 3.3 | window, input, rendering, audio output |
 
-Linux (Arch): `sudo pacman -S base-devel python-pillow sdl2 glew`.
-Windows: MSYS2 UCRT64 terminal, `pacman -S mingw-w64-ucrt-x86_64-gcc make pkgconf mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-glew`
-and Pillow for Python.
+Linux (Arch): `sudo pacman -S --needed base-devel python-pillow sdl2 glew`.
+Debian/Ubuntu: `sudo apt install build-essential pkg-config python3-venv libsdl2-dev libglew-dev`.
+Windows: MSYS2 (UCRT64 environment); `build.bat --install-deps` installs the rest.
 
-## 3. Export the decompiler output (once)
-
-The translator reads `decomp/game/pseudo_c/all.c`, which comes from your `game.dol`:
-
-```
-analyzeHeadless $PWD/decomp/game/ghidra_proj castlevania \
-  -import $PWD/orig/game.dol -loader BinaryLoader -processor PowerPC:BE:32:default \
-  -noanalysis -overwrite -scriptPath $PWD/decomp/ghidra \
-  -postScript ImportDol.java $PWD/orig/game.dol $PWD/decomp/game/config/symbols.txt \
-  $PWD/decomp/game/pseudo_c 80006F20 80164800 8031B7A0 8031EF60
-```
-
-(`analyzeHeadless` is in Ghidra's `support` folder.) It takes about two minutes.
-
-## 4. Translate and build
-
-```
-python3 decomp/tools/lift_native.py        # writes runtime/gen/ from orig/game.dol
-python3 scripts/make_osfont.py             # builds the system font from a free TTF on your machine
-cd runtime
-make -j$(nproc)                            # Linux: build/castlevania
-```
-
-On Windows, run the same commands from an MSYS2 UCRT64 terminal; the result is `build-win/castlevania.exe`
-(copy `SDL2.dll`, `glew32.dll` and `libwinpthread-1.dll` next to it). `play-windows.bat` starts it.
-
-## 5. Run
-
-```
-cd runtime
-./build/castlevania ../orig/game.dol       # optional 2nd argument: folder with the extracted files
-```
-
-Saves go to `runtime/nand/`. The first boot takes a few seconds.
-
-### Controls
+## Controls
 
 The game is played with the Wii Remote held sideways.
 
@@ -82,7 +71,7 @@ The game is played with the Wii Remote held sideways.
 | Unlimited frame rate | F4 | |
 
 The settings menu (F3) has VSync, frame limit, filters, internal resolution (1x to 4x), fullscreen and an
-FPS counter. Settings are stored in `runtime/settings.cfg`.
+FPS counter. Settings are stored in `runtime/settings.cfg`. Saves go to `runtime/nand/`.
 
 ### Useful environment variables
 
@@ -90,11 +79,32 @@ FPS counter. Settings are stored in `runtime/settings.cfg`.
 `RT_AUDIO=0` disables audio, `RT_HEADLESS=1` runs without a window, `RT_FILES` and `RT_NAND` choose the game
 files and save folders. See `PROGRESS.md` for the rest.
 
+## Manual steps (what the scripts do)
+
+```
+python3 decomp/tools/prepare_game.py game.wad orig       # or a folder with 00000004.app ... 00000009.app
+python3 decomp/tools/lift_native.py                      # writes runtime/gen/ from orig/game.dol
+python3 scripts/make_osfont.py                           # system font from a free TTF
+cd runtime && make -j$(nproc)
+```
+
+The translator needs the function signatures in `decomp/game/config/sigs.json`, which are included. To regenerate them
+from your own `game.dol` with Ghidra 12 (optional, only for development):
+
+```
+mkdir -p decomp/game/ghidra_proj decomp/game/pseudo_c
+analyzeHeadless $PWD/decomp/game/ghidra_proj castlevania \
+  -import $PWD/orig/game.dol -loader BinaryLoader -processor PowerPC:BE:32:default \
+  -noanalysis -overwrite -scriptPath $PWD/decomp/ghidra \
+  -postScript ImportDol.java $PWD/orig/game.dol $PWD/decomp/game/config/symbols.txt \
+  $PWD/decomp/game/pseudo_c 80006F20 80164800 8031B7A0 8031EF60
+python3 decomp/tools/export_sigs.py
+```
+
 ## Renaming functions
 
 Most functions still have names like `fn_8000C910`. Readable names are listed in
-`decomp/game/config/renames.txt`. Run `python3 decomp/tools/rename_fn.py` to apply them, then translate and
-build again.
+`decomp/game/config/renames.txt`. Run `python3 decomp/tools/rename_fn.py` to apply them, then run the build again.
 
 ---
 
@@ -103,35 +113,26 @@ build again.
 # Compilar y ejecutar
 
 Este repositorio **no contiene datos del juego**. Necesitas tu propia copia legal de
-*Castlevania: The Adventure ReBirth* (WiiWare), extraída por ti. El runtime nativo se construye traduciendo
-**tu** `game.dol` a C++ en tu máquina; ese código generado nunca se sube (está en `.gitignore`).
+*Castlevania: The Adventure ReBirth* (WiiWare), como archivo `.wad`. El runtime nativo se construye traduciendo
+el ejecutable de **tu** juego a C++ en tu máquina; ese código generado nunca se sube (está en `.gitignore`).
 
-## 1. Tus archivos del juego
+## Inicio rápido
 
-```
-orig/game.dol          el ejecutable principal (SHA-1 69795df60bdeae8faa8905f20f9c8af8455f3c53)
-orig/files/            los archivos del contenido del juego, extraídos de tu WAD
-```
+**Linux:** `./build.sh "/ruta/a/tu/juego.wad"`
 
-El runtime busca los archivos extraídos en `../orig/files` (relativo a `runtime/`). Puedes indicar otra carpeta
-con el segundo argumento de la línea de comandos o con la variable de entorno `RT_FILES`.
+**Windows:** instala [MSYS2](https://www.msys2.org) una vez, y luego arrastra tu `.wad` sobre `build.bat` o ejecuta
+`build.bat "C:\ruta\juego.wad" --install-deps` (instala con `pacman` lo que falte).
 
-## 2. Requisitos
+El script lo hace todo: desencripta el WAD (con el paquete de Python `libWiiPy`, en un `.venv` local; este repositorio no
+guarda ninguna clave), extrae `orig/game.dol` y `orig/files/`, traduce el juego a C++, genera la fuente del sistema y compila.
+El resultado es `runtime/build/castlevania` en Linux y `runtime\build-win\castlevania.exe` en Windows. Para jugar:
+`cd runtime && ./build/castlevania ../orig/game.dol` (Linux) o `runtime\play-windows.bat` (Windows).
 
-Python 3 con Pillow, Ghidra 12 (modo headless) con un JDK, g++ o clang++ (C++17), make, SDL2, GLEW y OpenGL 3.3.
-En Arch: `sudo pacman -S base-devel python-pillow sdl2 glew`. En Windows: terminal MSYS2 UCRT64 con los
-paquetes de la tabla de arriba.
-
-## 3 a 5. Pasos
-
-1. Exporta la salida del decompilador una vez (comando `analyzeHeadless` de la sección 3 en inglés).
-2. `python3 decomp/tools/lift_native.py` y `python3 scripts/make_osfont.py`.
-3. `cd runtime && make -j$(nproc)` y ejecuta `./build/castlevania ../orig/game.dol`.
-
-Los controles son los de la tabla de arriba (el juego se maneja con el Wii Remote en horizontal). Las
+Opciones: `--opt=-O2`, `-jN`, `--run`. Si ya tienes la carpeta de contenido desencriptada (por ejemplo la de Dolphin), pásala en
+lugar del WAD. Los controles son los de la tabla de arriba (el juego se maneja con el Wii Remote en horizontal). Las
 partidas se guardan en `runtime/nand/`.
 
 ## Renombrar funciones
 
 La mayoría de las funciones aún se llaman `fn_8000C910`. Los nombres legibles están en
-`decomp/game/config/renames.txt`; aplícalos con `python3 decomp/tools/rename_fn.py` y vuelve a traducir y compilar.
+`decomp/game/config/renames.txt`; aplícalos con `python3 decomp/tools/rename_fn.py` y vuelve a compilar.

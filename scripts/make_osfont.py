@@ -7,7 +7,7 @@ Salida: runtime/gen/osfont_ansi.bin = 224 bytes de anchos + hoja I4 en teselas d
 import os, sys, subprocess
 from PIL import Image, ImageDraw, ImageFont
 
-CANDS = ["DejaVuSans.ttf", "LiberationSans-Regular.ttf", "NotoSans-Regular.ttf", "FreeSans.ttf"]
+CANDS = ["DejaVuSans.ttf", "LiberationSans-Regular.ttf", "NotoSans-Regular.ttf", "FreeSans.ttf", "arial.ttf", "segoeui.ttf", "tahoma.ttf", "verdana.ttf", "Arial.ttf", "Helvetica.ttc"]   # las ultimas: fuentes del sistema en Windows/macOS
 def find_font():
     try:
         out = subprocess.run(["fc-list", ":", "file"], capture_output=True, text=True).stdout
@@ -17,6 +17,13 @@ def find_font():
     for c in CANDS:
         for f in files:
             if f.endswith("/" + c): return f
+    # sin fc-list (Windows, macOS): se busca en las carpetas de fuentes habituales
+    dirs = [os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts"), "/c/Windows/Fonts", "/usr/share/fonts", "/System/Library/Fonts", "/Library/Fonts"]
+    for c in CANDS:
+        for d in dirs:
+            for root, _, names in os.walk(d):
+                for n in names:
+                    if n.lower() == c.lower(): return os.path.join(root, n)
     return None
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

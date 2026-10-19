@@ -38,7 +38,5 @@ __pycache__/
 /runtime/log-win-*.txt
 /runtime/build-win-o1/
 
-# Generado desde game.dol por decomp/tools/trivial.py y las pruebas: no se versiona.
-/src/auto/
-/tests/difftest/auto_cases.py
-/tests/difftest/lift_status.txt
+# Entorno de Python local de build.sh
+/.venv/

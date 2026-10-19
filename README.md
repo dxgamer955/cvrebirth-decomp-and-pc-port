@@ -4,7 +4,7 @@
 
 > **Status: work in progress.** This repository hosts the tools and the native runtime of a PC port of
 > *Castlevania: The Adventure ReBirth* (WiiWare, 2009), and the readable, documented decompilation that is being
-> written on top of it. The port runs the game up to Stage 1; see [BUILD.md](BUILD.md) to build it with your own copy of the game.
+> written on top of it. The port runs the game up to Stage 1; run `build.sh` (or `build.bat` on Windows) with your own WAD to build it; see [BUILD.md](BUILD.md).
 
 ## What is this project?
 
@@ -47,7 +47,9 @@ src/        Readable, hand-written decompiled game code (gameplay, engine)
 include/    Headers for the above
 scripts/    Helper scripts
 tests/      Differential tests for the translator
+build.sh / build.bat   One-step build from your own WAD (Linux / Windows with MSYS2)
 BUILD.md    How to build and run (needs your own copy of the game)
+LICENSE     MIT license (project code only)
 PROGRESS.md Detailed development notes (Spanish)
 ```
 
@@ -70,7 +72,8 @@ decompilation community.
 
 ## License
 
-No license has been chosen yet. Until one is added, all rights are reserved by the author.
+The code in this repository is released under the [MIT License](LICENSE). The license covers only the project's own code
+and tools. It does not cover the game, its assets or its trademarks, which belong to Konami Digital Entertainment (see the legal notice above).
 
 ## Contributing
 
@@ -84,7 +87,7 @@ Issues and pull requests (function naming, documentation, bug reports) are welco
 
 > **Estado: trabajo en curso.** Este repositorio aloja las herramientas y el runtime nativo de un port para PC de
 > *Castlevania: The Adventure ReBirth* (WiiWare, 2009), y la decompilación legible y documentada que se escribe
-> encima. El port ejecuta el juego hasta el Stage 1; mira [BUILD.md](BUILD.md) para compilarlo con tu propia copia del juego.
+> encima. El port ejecuta el juego hasta el Stage 1; ejecuta `build.sh` (o `build.bat` en Windows) con tu propio WAD para compilarlo; mira [BUILD.md](BUILD.md).
 
 ### ¿Qué es este proyecto?
 
@@ -127,7 +130,9 @@ src/        Código del juego decompilado, legible y escrito a mano (gameplay, m
 include/    Cabeceras de lo anterior
 scripts/    Scripts auxiliares
 tests/      Pruebas diferenciales del traductor
+build.sh / build.bat   Compilación en un paso a partir de tu propio WAD (Linux / Windows con MSYS2)
 BUILD.md    Cómo compilar y ejecutar (hace falta tu propia copia del juego)
+LICENSE     Licencia MIT (solo el código del proyecto)
 PROGRESS.md Notas de desarrollo detalladas
 ```
 
@@ -150,7 +155,8 @@ decompilación de Wii / GameCube.
 
 ### Licencia
 
-Todavía no se ha elegido licencia. Hasta que se añada una, todos los derechos quedan reservados por el autor.
+El código de este repositorio se publica bajo la [licencia MIT](LICENSE). La licencia cubre solo el código y las herramientas
+del proyecto; no cubre el juego, sus recursos ni sus marcas, que pertenecen a Konami Digital Entertainment (ver el aviso legal).
 
 ### Contribuir
 

@@ -50,7 +50,13 @@ def sext(v, bits): return v - (1 << bits) if v & (1 << (bits - 1)) else v
 def hx(v): return f"{v & 0xFFFFFFFF:#x}"
 
 def ghidra_sigs():
-    """addr -> (tipo_retorno, [clases de parametro]) con clase 'f' (float/double), 'p' (puntero), 'i' (entero)."""
+    """addr -> (tipo_retorno, [clases de parametro]) con clase 'f' (float/double), 'p' (puntero), 'i' (entero).
+    Sale del pseudo-C de Ghidra si existe; si no, de decomp/game/config/sigs.json (tabla de firmas ya extraida, ver export_sigs.py)."""
+    if not os.path.exists(f"{ROOT}/decomp/game/pseudo_c/all.c"):
+        import json
+        path = f"{ROOT}/decomp/game/config/sigs.json"
+        if not os.path.exists(path): raise SystemExit("falta decomp/game/pseudo_c/all.c (exportacion de Ghidra) y decomp/game/config/sigs.json")
+        return {int(a, 16): (v[0], list(v[1])) for a, v in json.load(open(path)).items()}
     out, cur = {}, None
     for l in open(f"{ROOT}/decomp/game/pseudo_c/all.c", errors="replace"):
         m = re.match(r"^// ==== ([0-9a-f]{8}) ", l)

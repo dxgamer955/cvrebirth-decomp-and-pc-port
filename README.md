@@ -38,6 +38,37 @@ Where it stands:
 
 About 1,100 of the roughly 6,300 unnamed functions have readable names so far (`decomp/game/config/renames.txt`).
 
+## How to build (quick guide)
+
+You need your own copy of the game as a `.wad` file. **Put the `.wad` in the root folder of this repository**, the same
+folder that contains `build.sh`, `build.bat` and `README.md`. The build script looks for it there; any file name works.
+
+**Linux**
+
+1. Install the dependencies (Arch: `sudo pacman -S --needed base-devel python-pillow sdl2 glew`; Debian/Ubuntu:
+   `sudo apt install build-essential pkg-config python3-venv libsdl2-dev libglew-dev`).
+2. Copy your `.wad` into the repository root.
+3. Open a terminal in the repository root and run `./build.sh`.
+4. Play: `cd runtime && ./build/castlevania ../orig/game.dol`
+
+**Windows** (the build runs inside MSYS2, a free tool that provides the compiler)
+
+1. Download the MSYS2 installer from <https://www.msys2.org> (the `msys2-x86_64-....exe` file) and run it. Keep the default
+   folder `C:\msys64` and finish the installation.
+2. Open **MSYS2 UCRT64** from the Start menu and run `pacman -Syu`. If the window closes when it finishes, open it again and run
+   `pacman -Syu` once more. Then close the window.
+3. Copy your `.wad` into the repository root.
+4. Open the repository folder in Windows Explorer, click the address bar, type `cmd` and press Enter. In the black window run
+   `build.bat --install-deps`. The first time it installs the compiler and libraries it needs (a few minutes), then builds the game.
+   Next time you can just double-click `build.bat`.
+5. Play: double-click `runtime\play-windows.bat`.
+
+If MSYS2 is installed in a folder other than `C:\msys64` (or another drive letter such as `D:\msys64`), set the `MSYS2_ROOT`
+environment variable to that folder before running `build.bat`.
+
+The build creates `orig/` (your extracted game files) and `runtime/gen/` (code generated from your game). Neither is ever committed.
+More details, controls and options are in [BUILD.md](BUILD.md).
+
 ## Repository layout
 
 ```
@@ -120,6 +151,37 @@ Situación:
 - En curso: Funciones aún sin elevar, detalles del renderizador y rendimiento.
 
 Unas 1.100 de las aproximadamente 6.300 funciones sin nombre ya tienen un nombre legible (`decomp/game/config/renames.txt`).
+
+### Cómo compilar (guía rápida)
+
+Necesitas tu propia copia del juego como archivo `.wad`. **Coloca el `.wad` en la carpeta raíz de este repositorio**, la misma
+que contiene `build.sh`, `build.bat` y `README.md`. El script de compilación lo busca ahí; cualquier nombre de archivo sirve.
+
+**Linux**
+
+1. Instala las dependencias (Arch: `sudo pacman -S --needed base-devel python-pillow sdl2 glew`; Debian/Ubuntu:
+   `sudo apt install build-essential pkg-config python3-venv libsdl2-dev libglew-dev`).
+2. Copia tu `.wad` a la raíz del repositorio.
+3. Abre una terminal en la raíz del repositorio y ejecuta `./build.sh`.
+4. Para jugar: `cd runtime && ./build/castlevania ../orig/game.dol`
+
+**Windows** (la compilación se hace dentro de MSYS2, una herramienta gratuita que aporta el compilador)
+
+1. Descarga el instalador de MSYS2 desde <https://www.msys2.org> (el archivo `msys2-x86_64-....exe`) y ejecútalo. Deja la carpeta
+   por defecto `C:\msys64` y termina la instalación.
+2. Abre **MSYS2 UCRT64** desde el menú Inicio y ejecuta `pacman -Syu`. Si la ventana se cierra al terminar, ábrela otra vez y
+   ejecuta `pacman -Syu` una vez más. Luego ciérrala.
+3. Copia tu `.wad` a la raíz del repositorio.
+4. Abre la carpeta del repositorio en el Explorador de Windows, haz clic en la barra de direcciones, escribe `cmd` y pulsa Enter.
+   En la ventana negra ejecuta `build.bat --install-deps`. La primera vez instala el compilador y las librerías necesarias (unos
+   minutos) y después compila el juego. Las siguientes veces basta con hacer doble clic en `build.bat`.
+5. Para jugar: doble clic en `runtime\play-windows.bat`.
+
+Si MSYS2 está instalado en otra carpeta distinta de `C:\msys64` (u otra letra de unidad, como `D:\msys64`), define la variable de
+entorno `MSYS2_ROOT` con esa carpeta antes de ejecutar `build.bat`.
+
+La compilación crea `orig/` (los archivos extraídos de tu juego) y `runtime/gen/` (código generado a partir de tu juego). Ninguno se
+sube nunca al repositorio. Más detalles, controles y opciones en [BUILD.md](BUILD.md).
 
 ### Estructura del repositorio
 

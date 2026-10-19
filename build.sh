@@ -8,7 +8,7 @@
 #   folder          or a folder with the already decrypted content (for example Dolphin's NAND content folder)
 #   (no argument)   uses orig/game.dol and orig/files if they already exist, otherwise looks for a .wad as described above
 #   --install-deps  install what is missing with the package manager (pacman on MSYS2; on Linux it only prints the command)
-#   --opt=-O2       optimization level (default: -O2 on Windows, -O1 on Linux)
+#   --opt=-O2       optimization level (default: -O2; use -O1 to compile faster while developing)
 #   -jN             make jobs (default: all cores)
 #   --run           run the game when the build finishes
 #
@@ -32,6 +32,11 @@ die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 
 MSYS=0; case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) MSYS=1 ;; esac
 if [ "$MSYS" = 1 ] && [ -n "$SRC" ] && command -v cygpath >/dev/null; then SRC="$(cygpath -u "$SRC")"; fi
+
+# If no WAD was given and the game is not extracted yet, look for a .wad next to this script or in orig/
+if [ -z "$SRC" ] && { [ ! -f orig/game.dol ] || [ ! -d orig/files ]; }; then
+  for f in ./*.wad orig/*.wad; do [ -f "$f" ] && { SRC="$f"; say "Found a WAD: $f"; break; }; done
+fi
 
 # ---- 1. tools -----------------------------------------------------------------------------------------------------
 say "Checking tools"
@@ -70,11 +75,6 @@ Fedora: sudo dnf install gcc-c++ make pkgconf python3 SDL2-devel glew-devel mesa
   fi
 fi
 PY=python3; [ "$MSYS" = 1 ] && PY=python
-
-# If no WAD was given and the game is not extracted yet, look for a .wad next to this script or in orig/
-if [ -z "$SRC" ] && { [ ! -f orig/game.dol ] || [ ! -d orig/files ]; }; then
-  for f in ./*.wad orig/*.wad; do [ -f "$f" ] && { SRC="$f"; say "Found a WAD: $f"; break; }; done
-fi
 
 # ---- 2. Python environment (libWiiPy for the WAD, Pillow for the font) and game extraction -------------------------------
 if [ ! -f orig/game.dol ] || [ ! -d orig/files ]; then

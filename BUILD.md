@@ -27,8 +27,9 @@ build.bat                        # Windows (double click it)
 build.bat "C:\Users\me\Downloads\game.wad"                                              # Windows (or drag the WAD onto build.bat)
 ```
 
-**Windows only**: install [MSYS2](https://www.msys2.org) once first. Add `--install-deps` (for example `build.bat --install-deps`)
-to let the script install the missing MSYS2 packages with `pacman`.
+**Windows only**: install [MSYS2](https://www.msys2.org) once first (step-by-step instructions are in the
+[README](README.md#how-to-build-quick-guide)). Add `--install-deps` (for example `build.bat --install-deps`) to let the script
+install the missing MSYS2 packages with `pacman`.
 
 The script does everything:
 

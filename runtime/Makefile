@@ -18,7 +18,7 @@ LDFLAGS := -static-libgcc -static-libstdc++
 else
 BUILD := build
 EXE := castlevania
-OPT ?= -O1                                    # Linux: fast build (OPT=-O2 for maximum performance)
+OPT ?= -O2                                    # optimized for playing (OPT=-O1 compiles faster while developing)
 CXXFLAGS ?= -std=c++17 $(OPT) -g0 -w -Iinclude -Igen -fno-strict-aliasing -ffp-contract=off $(shell pkg-config --cflags sdl2 glew)
 LDLIBS := -rdynamic -ldl -lm $(shell pkg-config --libs sdl2 glew gl)
 LDFLAGS :=

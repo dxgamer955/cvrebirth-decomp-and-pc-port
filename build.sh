@@ -102,6 +102,8 @@ say "Generating the system font"
 "$PY" scripts/make_osfont.py
 say "Extracting the game's font for the interface"
 "$PY" scripts/make_uifont.py
+say "Working out the stage maps"
+"$PY" scripts/make_map.py
 
 # ---- 5. build ------------------------------------------------------------------------------------------------------------
 say "Building (-j$JOBS)"

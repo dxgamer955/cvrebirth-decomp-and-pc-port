@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <set>
 #include <sys/stat.h>
 #ifdef _WIN32
 #include <direct.h>
@@ -30,6 +31,7 @@ void gx_fast_forward(bool on);             // gx_render.cpp: sin limite y sin vs
 static unsigned s_autostart_frames = 0;
 static int s_point_stage = 0; static std::string s_point;        // ultimo punto restaurable
 static std::string s_cur_map; static bool s_arrival = false;
+static std::set<std::string> s_visited[7];   // mapa (M): salas visitadas de cada fase en esta partida (stage_map.cpp)
 // Jugador vivo: el que el juego inicializo (fn_8009F0C0) despues del ultimo gestor de campo. Justo tras construirse el gestor,
 // su +0x220 aun apunta al jugador anterior (p. ej. el de la pantalla del mapa del castillo, ya liberado): escribir ahi corrompia el heap.
 static u32 s_live_player = 0; static unsigned s_live_ticks = 0;
@@ -106,6 +108,7 @@ void game_state_tick() {
     std::string map = game_str(field + 0x168);
     if (map != s_cur_map) { s_cur_map = map; s_arrival = true; }
     if (s_arrival) { s_arrival = false; record_point(g, field, player); }
+    s_visited[LD32(g + 0x28)].insert(map);
     if (s_apply_player) {
         s_apply_player = false;
         ST32(player + 0x208, s_load.hearts); STF(player + 0x204, s_load.hp); ST32(player + 0x20c, s_load.whip);
@@ -115,9 +118,19 @@ void game_state_tick() {
     }
 }
 
+// ---- mapa (M) ----
+bool game_map_where(int& stage, std::string& room, float& x, float& y) {
+    u32 g, field, player;
+    if (!in_stage(g, field, player)) return false;
+    stage = (int)LD32(g + 0x28); room = game_str(field + 0x168); x = LDF(player + 0x78); y = LDF(player + 0x7c);
+    return !room.empty();
+}
+bool game_map_visited(int stage, const std::string& room) { return stage >= 1 && stage <= 6 && s_visited[stage].count(room) > 0; }
+
 // ---- ganchos ----
 void game_hook_start(u32 flow_obj) {
     s_flow_obj = flow_obj;
+    for (auto& v : s_visited) v.clear();        // partida nueva (o continuar): el mapa empieza sin explorar
     if (g_pending_start.stage) {
         ST32(flow_obj + 0xc4, (u32)g_pending_start.stage);
         rt_log("[game] empezar en la fase %d\n", g_pending_start.stage);

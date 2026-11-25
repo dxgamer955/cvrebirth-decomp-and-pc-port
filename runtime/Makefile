@@ -41,12 +41,18 @@ $(shell mkdir -p gen; printf '$(BUILD_INFO)\n' > gen/build_info.h.new; cmp -s ge
 ifeq ($(wildcard gen/ui_gamefont.h),)
 $(shell (python3 ../scripts/make_uifont.py || python ../scripts/make_uifont.py) >/dev/null 2>&1)
 endif
+# The stage maps of the map screen (gen/ui_stagemap.h, from the rooms of your copy): generated once if missing
+# (build.sh also does it); without it the map screen says there is no map data
+ifeq ($(wildcard gen/ui_stagemap.h),)
+$(shell (python3 ../scripts/make_map.py || python ../scripts/make_map.py) >/dev/null 2>&1)
+endif
 
 $(BUILD)/$(EXE): $(OBJ)
 	$(CXX) $(OBJ) -o $@ $(LDFLAGS) $(LDLIBS)
 
 $(BUILD)/src/home_menu.o: gen/build_info.h      # (after the main target: the first rule is make's default goal)
 $(BUILD)/src/ui_font.o: $(wildcard gen/ui_gamefont.h)
+$(BUILD)/src/stage_map.o: $(wildcard gen/ui_stagemap.h)
 
 $(BUILD)/%.o: %.cpp include/*.h gen/decls.h
 	@mkdir -p $(dir $@)

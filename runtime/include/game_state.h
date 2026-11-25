@@ -35,6 +35,8 @@ bool game_save_slot(int slot, const std::vector<u8>& thumb_rgb);
 [[noreturn]] void game_start_stage(int stage);     // selector de fases: relanza y empieza en esa fase
 void game_state_startup();                         // main.cpp: RT_LOAD_SLOT / RT_START_STAGE (puestos antes de relanzar)
 void game_state_tick();                            // cada retrazado (hle_vi.cpp)
+bool game_map_where(int& stage, std::string& room, float& x, float& y);   // mapa: fase, sala y posicion del jugador (pies)
+bool game_map_visited(int stage, const std::string& room);                  // mapa: sala visitada en esta partida
 bool game_autostart_active();                      // gx_input_buttons: pulsar "confirmar" hasta que empiece la partida
 void game_hook_start(u32 flow_obj);                // gancho: fn_8002BF50 (empezar partida en la fase de obj+0xc4)
 void game_hook_field();                            // gancho: DrcDebugPrimitive_ctor (gestor de campo; lee start_map)

@@ -24,7 +24,8 @@ void pad_dirs(bool& l, bool& r, bool& u, bool& d) {
     l = pad_btn(SDL_CONTROLLER_BUTTON_DPAD_LEFT) || lx < -0.5f; r = pad_btn(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) || lx > 0.5f;
     u = pad_btn(SDL_CONTROLLER_BUTTON_DPAD_UP) || ly < -0.5f;   d = pad_btn(SDL_CONTROLLER_BUTTON_DPAD_DOWN) || ly > 0.5f;
 }
-// X = boton 1 (saltar), A = boton 2 (atacar), LB = A, RB = B, Start = +, Back = -. (El boton central abre el menu F3.)
+// X = boton 1 (saltar), A = boton 2 (atacar), LB = A, RB = B, Start = +. Back (SELECT) abre el mapa (gx_render.cpp) y el
+// boton central el menu HOME; el - del Wii Remote queda en Retroceso del teclado.
 u32 pad_hold(bool upright) {
     if (!g_pad) return 0;
     u32 h = 0; bool l, r, u, d; pad_dirs(l, r, u, d);
@@ -35,7 +36,6 @@ u32 pad_hold(bool upright) {
     if (pad_btn(SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) h |= 0x0800;
     if (pad_btn(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) h |= 0x0400;
     if (pad_btn(SDL_CONTROLLER_BUTTON_START)) h |= 0x0010;
-    if (pad_btn(SDL_CONTROLLER_BUTTON_BACK)) h |= 0x1000;
     return h;
 }
 

@@ -107,8 +107,9 @@ The game is played with the Wii Remote held sideways.
 | Jump (button 1) | Z or 1 | X |
 | Attack (button 2) | X or 2 | A |
 | Button A / B | C / V | LB / RB |
-| Plus / Minus | Space or Enter / Backspace | Start / Back |
+| Plus / Minus | Space or Enter / Backspace | Start / (none) |
 | HOME menu (pause, settings, reset, quit, credits) | H | Guide button |
+| Stage map | M | Back (SELECT) |
 | Settings menu | F3 (or HOME menu > Settings) | |
 | Unlimited frame rate | F4 | |
 
@@ -124,6 +125,12 @@ stack. The Wii's HOME menu needs the console's shared HOME Menu content, which a
 install, so the game would only show "Could not access Wii system memory". `RT_WII_HOME=1` sends HOME to the game instead
 (for testing, with that content extracted to a `shared` folder next to `files`).
 
+M (SELECT on a gamepad) pauses the game and shows the map of the stage in the middle of the screen: only the rooms you have been in, each in its
+place in the whole stage (the boss room in red), the room you are in and a blinking dot where you are, with the rooms
+explored so far. M, Esc, SELECT or B closes it. The game has no map of its own: `scripts/make_map.py` works out where each
+room goes from the rooms of your copy (their links and the room scripts) and writes `runtime/gen/ui_stagemap.h`, which is
+never committed. The rooms explored are kept until you start a new game or continue.
+
 ### Useful environment variables
 
 `RT_FPS=1` prints frame statistics, `RT_SAMPLE=1` profiles the game thread (Linux and Windows),
@@ -137,6 +144,7 @@ python3 decomp/tools/prepare_game.py game.wad orig       # or a folder with 0000
 python3 decomp/tools/lift_native.py                      # writes runtime/gen/ from orig/game.dol
 python3 scripts/make_osfont.py                           # system font from a free TTF
 python3 scripts/make_uifont.py                           # the game's own font for the port's menus (from orig/files)
+python3 scripts/make_map.py                              # the stage maps for the map screen, M (from orig/files)
 cd runtime && make -j$(nproc)
 ```
 
@@ -190,6 +198,12 @@ El resultado es `runtime/build/castlevania` en Linux y `runtime\build-win\castle
 Opciones: `--opt=-O2`, `-jN`, `--run`. Si ya tienes la carpeta de contenido desencriptada (por ejemplo la de Dolphin), pásala en
 lugar del WAD. Los controles son los de la tabla de arriba (el juego se maneja con el Wii Remote en horizontal). Las
 partidas se guardan en `runtime/nand/`.
+
+M (SELECT en un mando) pausa el juego y muestra el mapa de la fase en el centro de la pantalla: solo las salas en las que has estado,
+cada una en su sitio de la fase entera (la del jefe en rojo), la sala actual y un punto que parpadea donde estás, con las
+salas exploradas. M, Esc, SELECT o B lo cierran. El juego no tiene mapa propio: `scripts/make_map.py` calcula dónde va cada sala a partir
+de las salas de tu copia (sus enlaces y los scripts de las salas) y escribe `runtime/gen/ui_stagemap.h`, que nunca se sube. Las
+salas exploradas se conservan hasta que empiezas una partida nueva o continúas.
 
 
 ### Paquete de Windows (carpeta portable)

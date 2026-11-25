@@ -5,6 +5,7 @@
 #include "pad.h"
 #include "ui_font.h"
 #include "home_menu.h"
+#include "stage_map.h"
 #include "game_state.h"
 #include "tex_decode.h"
 #include <GL/glew.h>
@@ -55,7 +56,7 @@ static int g_sc = 1;                                          // factor de resol
 #define EFB_H (LH * g_sc)
 struct Settings { int show_fps = 0, vsync = 0, unlimited = 0, screen_filter = 1, tex_filter = 0, scale = 1, fullscreen = 0, pause_bg = 1; };   // menu F3
 static Settings g_set;
-struct PresentInfo { Settings set; bool show_fps; bool menu_open; int menu_sel; char fps_text[32]; int frame; bool home_open; HomeView home; bool loading; };   // lo que el hilo de render necesita para presentar
+struct PresentInfo { Settings set; bool show_fps; bool menu_open; int menu_sel; char fps_text[32]; int frame; bool home_open; HomeView home; bool loading; bool map_open; MapView map; };   // lo que el hilo de render necesita para presentar
 static bool g_menu_open = getenv("RT_MENU") != nullptr, g_filter_dirty = true;
 static int g_filter_applied = -1;
 static void settings_load();
@@ -768,20 +769,21 @@ static void render_present(const PresentInfo& pi) {
     glUseProgram(prog); glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_xfb_tex); glUniform1i(glGetUniformLocation(prog, "t"), 0);
     if (g_filter_dirty || pi.set.screen_filter != g_filter_applied) { GLint f = pi.set.screen_filter ? GL_LINEAR : GL_NEAREST; glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f); g_filter_dirty = false; g_filter_applied = pi.set.screen_filter; }
     glBindVertexArray(vao); glDrawArrays(GL_TRIANGLES, 0, 3);
-    if (pi.show_fps || pi.menu_open || pi.home_open || pi.loading) {
+    if (pi.show_fps || pi.menu_open || pi.home_open || pi.loading || pi.map_open) {
         ui_begin(w, h);
         if (pi.loading) {                                           // arranque automatico (cargar ranura / selector de fases): tapa los menus que pasan rapido
             int sc = h >= 1000 ? 4 : (h >= 700 ? 3 : 2); ui_rect(0, 0, (float)w, (float)h, 0.f, 0.f, 0.f, 1.f);
             const char* t = "LOADING..."; ui_text((w - ui_text_width(t, sc)) / 2, (h - (float)ui_char_h() * sc) / 2, sc, t, 1.f, 0.85f, 0.35f);
         }
+        if (pi.map_open) map_draw(w, h, pi.map, pi.frame);
         if (pi.home_open) home_draw(w, h, pi.home);
-        if (pi.show_fps && !pi.home_open) { int sc = h >= 1000 ? 4 : (h >= 500 ? 3 : 2); ui_text((float)(4 * sc), (float)(4 * sc), sc, pi.fps_text, 1.f, 0.95f, 0.2f); }
+        if (pi.show_fps && !pi.home_open && !pi.map_open) { int sc = h >= 1000 ? 4 : (h >= 500 ? 3 : 2); ui_text((float)(4 * sc), (float)(4 * sc), sc, pi.fps_text, 1.f, 0.95f, 0.2f); }
         if (pi.menu_open) menu_draw(w, h);
         glDisable(GL_BLEND);
     }
     static const char* ui_shot = getenv("RT_UI_SHOT");              // prueba: RT_UI_SHOT=prefijo captura la ventana con el menu HOME abierto
     static int ui_shot_n = 0;                                       // (una de cada 20 presentaciones: prefijo0.ppm, prefijo1.ppm...)
-    if (ui_shot && pi.home_open && ui_shot_n++ % 20 == 10) {
+    if (ui_shot && (pi.home_open || pi.map_open) && ui_shot_n++ % 20 == 10) {
         std::vector<u8> px((size_t)w * h * 4); glBindFramebuffer(GL_FRAMEBUFFER, 0); glReadBuffer(GL_BACK); glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
         FILE* f = fopen((std::string(ui_shot) + std::to_string(ui_shot_n / 20) + ".ppm").c_str(), "wb");
         if (f) { fprintf(f, "P6 %d %d 255\n", w, h); for (int y = h - 1; y >= 0; y--) for (int x = 0; x < w; x++) fwrite(&px[((size_t)y * w + x) * 4], 1, 3, f); fclose(f); }
@@ -830,6 +832,7 @@ static PresentInfo base_present_info() {
 }
 // ---- menu HOME propio (H / boton central): pausa el juego y el audio como al perder el foco ----
 static bool g_home_request = false;
+static int g_map_request = 0;                                     // mapa de la fase: 1 tecla M, 2 SELECT, 3 prueba
 static bool g_input_hold = false;                                 // tras cerrar un menu, los botones no llegan al juego hasta soltarlos
 
 // Miniatura del ultimo fotograma del juego (el XFB, sin el menu encima) a THUMB_W x THUMB_H RGB, en el hilo de render
@@ -955,6 +958,36 @@ static void home_menu_run() {
     else if (action == HOME_QUIT) rt_quit("salir desde el menu HOME");
 }
 
+// ---- mapa de la fase (M / SELECT): pausa el juego y el audio como el menu HOME ----
+static void map_run(int why) {
+    MapView mv;
+    if (!map_view_build(mv)) return;                               // fuera de una fase: nada
+    extern void rt_time_skip(double); extern void audio_pause(bool, double);
+    double t0 = now_s(); audio_pause(true, 0);
+    rt_log("[map] abierto (%s, fotograma %d): fase %d, sala %d, %s\n", why == 1 ? "tecla M" : why == 2 ? "SELECT" : "prueba", g_frame_no, mv.stage, mv.cur, mv.data ? "con mapa" : "sin datos (scripts/make_map.py)");
+    static const bool test = getenv("RT_TEST_MAPVIEW") != nullptr;
+    bool prev[2] = {}, first = true;
+    for (int it = 0;; it++) {
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) { if (e.type == SDL_QUIT) rt_quit("ventana cerrada"); pad_event(e); }
+        const u8* k = SDL_GetKeyboardState(nullptr);
+        bool now[2] = { k[SDL_SCANCODE_M] || k[SDL_SCANCODE_ESCAPE] || pad_btn(SDL_CONTROLLER_BUTTON_BACK) || pad_btn(SDL_CONTROLLER_BUTTON_B),
+                        k[SDL_SCANCODE_H] || pad_btn(SDL_CONTROLLER_BUTTON_GUIDE) };
+        if (first) { memcpy(prev, now, sizeof prev); first = false; }  // la tecla que lo abrio no lo cierra
+        bool close = now[0] && !prev[0], home = now[1] && !prev[1]; prev[0] = now[0]; prev[1] = now[1];
+        if (test && it == 180) close = true;
+        if (close || home) { if (home) g_home_request = true; break; }
+        PresentInfo pi = base_present_info(); pi.map_open = true; pi.map = mv;
+        g_pending_presents++;
+        rq_push([pi] { render_present(pi); g_pending_presents--; { std::lock_guard<std::mutex> lk(g_q_mtx); } g_q_room.notify_all(); });
+        rq_wait_presents(0);                                       // con vsync, el intercambio marca el ritmo
+        if (!g_set.vsync) SDL_Delay(16);
+    }
+    double dt = now_s() - t0; rt_time_skip(dt); audio_pause(false, dt);
+    g_input_hold = true;
+    rt_log("[map] cerrado\n");
+}
+
 void gx_frame_present() {
     if (getenv("RT_WATCH_DISPLAY")) { static u32 last_obj = 0, last_w = 0xFFFFFFFF; u32 o = LD32(0x803166CC);
         if (o != last_obj) { fprintf(stderr, "[watch] MDisplay obj = %08x\n", o); last_obj = o; last_w = 0xFFFFFFFF; }
@@ -973,13 +1006,15 @@ void gx_frame_present() {
         bool f3 = edge(SDL_SCANCODE_F3), f4 = edge(SDL_SCANCODE_F4), up = edge(SDL_SCANCODE_UP), dn = edge(SDL_SCANCODE_DOWN), lf = edge(SDL_SCANCODE_LEFT), rt = edge(SDL_SCANCODE_RIGHT), en = edge(SDL_SCANCODE_RETURN), es = edge(SDL_SCANCODE_ESCAPE);
         {   // mando: el boton central abre/cierra el menu; cruceta/palanca navegan, A confirma, B cierra
             static bool pv[8]; bool l, r, u, d; pad_dirs(l, r, u, d);
-            bool now[8] = { pad_btn(SDL_CONTROLLER_BUTTON_GUIDE), u, d, l, r, pad_btn(SDL_CONTROLLER_BUTTON_A), pad_btn(SDL_CONTROLLER_BUTTON_B), false };
+            bool now[8] = { pad_btn(SDL_CONTROLLER_BUTTON_GUIDE), u, d, l, r, pad_btn(SDL_CONTROLLER_BUTTON_A), pad_btn(SDL_CONTROLLER_BUTTON_B), pad_btn(SDL_CONTROLLER_BUTTON_BACK) };
             bool e_[8]; for (int i = 0; i < 8; i++) { e_[i] = now[i] && !pv[i]; pv[i] = now[i]; }
             if (e_[0]) g_home_request = true;                  // boton central: menu HOME (F3 se abre desde el)
+            if (e_[7] && !g_menu_open) g_map_request = 2;   // SELECT (Back): mapa de la fase
             if (g_menu_open) { up |= e_[1]; dn |= e_[2]; lf |= e_[3]; rt |= e_[4]; en |= e_[5]; es |= e_[6]; }
         }
         extern bool g_wii_home;
         if (edge(SDL_SCANCODE_H) && !g_wii_home && !g_menu_open) g_home_request = true;
+        if (edge(SDL_SCANCODE_M) && !g_menu_open) g_map_request = 1;
         if (f3) g_menu_open = !g_menu_open;
         if (f4) { g_set.unlimited ^= 1; settings_apply(false); settings_save(); fprintf(stderr, "[rt] limite de 60 Hz %s\n", g_set.unlimited ? "DESACTIVADO" : "activado"); }
         if (g_menu_open) {
@@ -1036,7 +1071,10 @@ void gx_frame_present() {
     }
     static const char* test_home = getenv("RT_TEST_HOME");
     if (test_home && frame == atoi(test_home)) g_home_request = true;
-    if (g_home_request) { g_home_request = false; if (!game_autostart_active()) home_menu_run(); }
+    if (g_home_request) { g_home_request = false; g_map_request = 0; if (!game_autostart_active()) home_menu_run(); }
+    static const char* test_map = getenv("RT_TEST_MAPVIEW");        // prueba: RT_TEST_MAPVIEW=fotograma abre el mapa ahi (y lo cierra a los 3 s)
+    if (test_map && frame == atoi(test_map)) g_map_request = 3;
+    if (g_map_request) { int why = g_map_request; g_map_request = 0; if (!game_autostart_active()) map_run(why); }
 }
 
 void gx_render_stats() {

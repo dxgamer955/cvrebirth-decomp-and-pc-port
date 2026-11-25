@@ -1,0 +1,4 @@
+# Game functions that call rt_hook(addr, a0..a3) on entry (runtime/src/game_hooks.cpp). One name per line.
+fn_8002BF50            # start a game at the stage in obj+0xc4 (stage select, loading a save slot)
+DrcDebugPrimitive_ctor # field/map manager: reads the "start_map" setting (map:entry) -> loading a save slot
+fn_8009F0C0            # player (re)initialisation: the only player object the port trusts afterwards (stats of a loaded slot)

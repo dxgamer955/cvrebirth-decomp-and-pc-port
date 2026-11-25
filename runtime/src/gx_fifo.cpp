@@ -17,7 +17,7 @@ static inline u16 be16(const u8* p) { return (u16)(((u32)p[0] << 8) | p[1]); }
 static inline float bef(const u8* p) { u32 v = be32(p); float f; memcpy(&f, &v, 4); return f; }
 
 // ---- descripcion del formato de vertice ----
-struct AttrFmt { u32 vcd; u32 cnt; u32 fmt; u32 shift; };       // vcd: 0 ninguno, 1 directo, 2 indice8, 3 indice16
+struct AttrFmt { u32 vcd; u32 cnt; u32 fmt; u32 shift; float scale; };   // vcd: 0 ninguno, 1 directo, 2 indice8, 3 indice16; scale = 1 / 2^shift
 
 static u32 comp_size(u32 fmt) { switch (fmt) { case 0: case 1: return 1; case 2: case 3: return 2; default: return 4; } }
 
@@ -48,6 +48,9 @@ static VtxFmt make_fmt(u32 vat) {
     f.tex[5].cnt = (c >> 5) & 1; f.tex[5].fmt = (c >> 6) & 7; f.tex[5].shift = (c >> 9) & 31;
     f.tex[6].cnt = (c >> 14) & 1; f.tex[6].fmt = (c >> 15) & 7; f.tex[6].shift = (c >> 18) & 31;
     f.tex[7].cnt = (c >> 23) & 1; f.tex[7].fmt = (c >> 24) & 7; f.tex[7].shift = (c >> 27) & 31;
+    f.pos.scale = 1.0f / (float)(1u << f.pos.shift);
+    for (int i = 0; i < 8; i++) f.tex[i].scale = 1.0f / (float)(1u << f.tex[i].shift);
+    f.nrm.scale = f.nrm.fmt == 1 ? 1.0f / 64.0f : f.nrm.fmt == 3 ? 1.0f / 16384.0f : 1.0f;
     return f;
 }
 
@@ -72,8 +75,7 @@ static u32 vertex_size(const VtxFmt& f) {
     return n;
 }
 
-static float read_comp(const u8* p, u32 fmt, u32 shift) {
-    float scale = 1.0f / (float)(1u << shift);
+static inline float read_comp(const u8* p, u32 fmt, float scale) {
     switch (fmt) {
     case 0: return (float)p[0] * scale;
     case 1: return (float)(s8)p[0] * scale;
@@ -109,12 +111,12 @@ static void decode_vertex(const VtxFmt& f, const u8*& cur, GxVertex& v) {
     if (f.pos.vcd) {
         u32 n = f.pos.cnt ? 3 : 2, cs = comp_size(f.pos.fmt);
         const u8* p = attr_ptr(f.pos, 0, cur, n * cs);
-        for (u32 i = 0; i < n; i++) v.pos[i] = read_comp(p + i * cs, f.pos.fmt, f.pos.shift);
+        for (u32 i = 0; i < n; i++) v.pos[i] = read_comp(p + i * cs, f.pos.fmt, f.pos.scale);
     }
     if (f.nrm.vcd) {
         u32 cs = comp_size(f.nrm.fmt);
         const u8* p = attr_ptr(f.nrm, 1, cur, 3 * cs);
-        for (u32 i = 0; i < 3; i++) v.nrm[i] = read_comp(p + i * cs, f.nrm.fmt, f.nrm.fmt == 1 ? 6 : f.nrm.fmt == 3 ? 14 : 0);
+        for (u32 i = 0; i < 3; i++) v.nrm[i] = read_comp(p + i * cs, f.nrm.fmt, f.nrm.scale);
     }
     for (int c = 0; c < 2; c++) if (f.col[c].vcd) {
         const u8* p = attr_ptr(f.col[c], 2 + c, cur, color_size(f.col[c].fmt));
@@ -123,12 +125,16 @@ static void decode_vertex(const VtxFmt& f, const u8*& cur, GxVertex& v) {
     for (int t = 0; t < 8; t++) if (f.tex[t].vcd) {
         u32 n = f.tex[t].cnt ? 2 : 1, cs = comp_size(f.tex[t].fmt);
         const u8* p = attr_ptr(f.tex[t], 4 + t, cur, n * cs);
-        for (u32 i = 0; i < n; i++) v.tex[t][i] = read_comp(p + i * cs, f.tex[t].fmt, f.tex[t].shift);
+        for (u32 i = 0; i < n; i++) v.tex[t][i] = read_comp(p + i * cs, f.tex[t].fmt, f.tex[t].scale);
     }
 }
 
+// Formato de vertice ya calculado por VAT: se rehace solo tras escribir VCD/VAT (cp_write).
+static VtxFmt g_fmt_cache[8]; static u32 g_fmt_size[8]; static u8 g_fmt_valid = 0;
+
 // ---- interprete de comandos ----
 static void cp_write(u32 reg, u32 val) {
+    if (reg == 0x50 || reg == 0x60 || (reg >= 0x70 && reg < 0x98)) g_fmt_valid = 0;
     if (reg == 0x50) g_gx.vcdLo = val;
     else if (reg == 0x60) g_gx.vcdHi = val;
     else if (reg >= 0x70 && reg < 0x78) g_gx.vatA[reg - 0x70] = val;
@@ -180,8 +186,9 @@ static bool process_one() {
         u32 prim = (op >> 3) & 7, vat = op & 7, cnt = be16(p + 1);
         static int dbg = 0;
         if (dbg < 8 && dbg++ >= 0) { fprintf(stderr, "[gx] draw op=%02X prim=%u vat=%u cnt=%u vcd=%08X/%08X vatA=%08X bytes:", op, prim, vat, cnt, g_gx.vcdLo, g_gx.vcdHi, g_gx.vatA[vat]); for (int i = 0; i < 16 && (size_t)i < n; i++) fprintf(stderr, " %02X", p[i]); fputc('\n', stderr); }
-        VtxFmt f = make_fmt(vat);
-        u32 vs = vertex_size(f);
+        if (!(g_fmt_valid & (1u << vat))) { g_fmt_cache[vat] = make_fmt(vat); g_fmt_size[vat] = vertex_size(g_fmt_cache[vat]); g_fmt_valid |= 1u << vat; }
+        const VtxFmt& f = g_fmt_cache[vat];
+        u32 vs = g_fmt_size[vat];
         static const char* e_raw = getenv("RT_RAW");
         if (const char* e = e_raw) { static long lo = -1, hi = 0, nd = 0; if (lo < 0) sscanf(e, "%ld,%ld", &lo, &hi);
             if (nd >= lo && nd < hi) { fprintf(stderr, "[raw] draw %ld op=%02X cnt=%u vs=%u:", nd, op, cnt, vs); for (u32 i = 0; i < vs * 2 && 3 + i < n; i++) fprintf(stderr, " %02X", p[3 + i]); fputc('\n', stderr); } nd++; }

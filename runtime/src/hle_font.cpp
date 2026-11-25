@@ -3,14 +3,17 @@
 // la cabecera OSFontHeader lista en el bufer del invitado.
 #include "hle.h"
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
 static std::vector<u8>& font_blob() {
     static std::vector<u8> blob;
     if (blob.empty()) {
-        static const char* paths[] = { "gen/osfont_ansi.bin", "runtime/gen/osfont_ansi.bin", "../runtime/gen/osfont_ansi.bin" };
+        // RT_OSFONT = ruta explicita (el AppImage la pone; su directorio de trabajo es el de datos del usuario)
+        static const char* paths[] = { getenv("RT_OSFONT"), "gen/osfont_ansi.bin", "runtime/gen/osfont_ansi.bin", "../runtime/gen/osfont_ansi.bin" };
         for (const char* p : paths) {
+            if (!p) continue;
             FILE* f = fopen(p, "rb");
             if (!f) continue;
             blob.resize(224 + 0x20000);

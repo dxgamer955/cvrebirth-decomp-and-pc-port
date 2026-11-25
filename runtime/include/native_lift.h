@@ -34,6 +34,16 @@ static inline void GXF32(u32 v) {
     u32 t = __builtin_bswap32(v); memcpy(g_gxf_buf + g_gxf_end, &t, 4); g_gxf_end += 4;
     if (g_gxf_end >= g_gxf_trig) gx_fifo_parse();
 }
+static inline void GXF8(u32 v) {                       // GXWrite*U8/S8 (comandos, indices): misma ruta rapida que GXF32
+    if (__builtin_expect(g_gxf_end + 1 > g_gxf_cap, 0)) gx_fifo_grow();
+    g_gxf_buf[g_gxf_end++] = (u8)v;
+    if (g_gxf_end >= g_gxf_trig) gx_fifo_parse();
+}
+static inline void GXF16(u32 v) {
+    if (__builtin_expect(g_gxf_end + 2 > g_gxf_cap, 0)) gx_fifo_grow();
+    u16 t = __builtin_bswap16((u16)v); memcpy(g_gxf_buf + g_gxf_end, &t, 2); g_gxf_end += 2;
+    if (g_gxf_end >= g_gxf_trig) gx_fifo_parse();
+}
 
 static inline u8* HP(u32 a) { return g_mem + (a & 0x1FFFFFFFu); }
 static inline bool IS_MMIO(u32 a) { u32 t = a >> 24; return t == 0xCC || t == 0xCD; }
@@ -44,8 +54,8 @@ static inline u32 LD16S(u32 a) { return (u32)(s32)(s16)LD16(a); }
 static inline u32 LD32(u32 a)  { if (IS_MMIO(a)) return rt_mmio_read(a, 4); u32 v; memcpy(&v, HP(a), 4); return __builtin_bswap32(v); }
 static inline f32 LDF(u32 a)   { u32 v = LD32(a); f32 f; memcpy(&f, &v, 4); return f; }
 static inline f64 LDD(u32 a)   { u64 v; memcpy(&v, HP(a), 8); v = __builtin_bswap64(v); f64 d; memcpy(&d, &v, 8); return d; }
-static inline void ST8(u32 a, u32 v)  { if (IS_MMIO(a)) { rt_mmio_write(a, 1, v); return; } *HP(a) = (u8)v; }
-static inline void ST16(u32 a, u32 v) { if (IS_MMIO(a)) { rt_mmio_write(a, 2, v); return; } u16 t = __builtin_bswap16((u16)v); memcpy(HP(a), &t, 2); }
+static inline void ST8(u32 a, u32 v)  { if (IS_MMIO(a)) { if (IS_GXF(a)) GXF8(v); else rt_mmio_write(a, 1, v); return; } *HP(a) = (u8)v; }
+static inline void ST16(u32 a, u32 v) { if (IS_MMIO(a)) { if (IS_GXF(a)) GXF16(v); else rt_mmio_write(a, 2, v); return; } u16 t = __builtin_bswap16((u16)v); memcpy(HP(a), &t, 2); }
 static inline void ST32(u32 a, u32 v) { if (IS_MMIO(a)) { if (IS_GXF(a)) GXF32(v); else rt_mmio_write(a, 4, v); return; } u32 t = __builtin_bswap32(v); memcpy(HP(a), &t, 4); }
 static inline void STF(u32 a, f32 f)  { u32 v; memcpy(&v, &f, 4); ST32(a, v); }
 static inline void STD(u32 a, f64 d)  { if (IS_MMIO(a)) { u64 b; memcpy(&b, &d, 8); if (IS_GXF(a)) { GXF32((u32)(b >> 32)); GXF32((u32)b); return; } rt_mmio_write(a, 4, (u32)(b >> 32)); rt_mmio_write(a + 4, 4, (u32)b); return; }
@@ -72,7 +82,8 @@ struct RtFrame {
 };
 
 void rt_trace(u32 addr, u32 a0, u32 a1, u32 a2, u32 a3);
-void rt_trace_ret(u32 addr, u32 r3);                            // (retorno de las funciones de trace.txt)       // runtime/trace.txt: funciones cuyas llamadas se imprimen
+void rt_trace_ret(u32 addr, u32 r3);
+void rt_hook(u32 addr, u32 a0, u32 a1, u32 a2, u32 a3);           // runtime/hooks.txt: entrada de funciones del juego que el port intercepta (game_hooks.cpp)                            // (retorno de las funciones de trace.txt)       // runtime/trace.txt: funciones cuyas llamadas se imprimen
 // Interrupciones del invitado (retrazado de VI...): un temporizador del host levanta g_irq_pending y se atiende
 // en los bucles del codigo elevado (RT_POLL en las ramas hacia atras), como una interrupcion en un bucle de espera.
 extern volatile int g_irq_pending;

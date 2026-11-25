@@ -18,6 +18,7 @@ static inline RetRegs RET_F(f64 v)    { return MKRET(0, 0, v); }
 RetRegs rt_unimplemented_named(u32 addr, const char* name, const char* why);
 
 // ---- utilidades del runtime ----
+static const u32 RT_SCRATCH = 0x817FF000;   // 4 KB al final de MEM1 fuera del arena del juego: cadenas que el port pasa a funciones del juego
 void rt_log(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 [[noreturn]] void rt_fatal(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 void rt_backtrace(int max = 14);                         // imprime la pila de llamadas elevadas

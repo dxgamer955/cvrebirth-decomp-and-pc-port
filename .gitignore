@@ -30,6 +30,7 @@ __pycache__/
 /runtime/build/
 
 /runtime/nand/
+/runtime/saves/
 
 # Ajustes locales del menu F3 del runtime nativo.
 /runtime/settings.cfg

@@ -44,6 +44,7 @@ static std::chrono::steady_clock::time_point g_t0;
 static FILE* g_dump = nullptr;
 static u64 g_underruns = 0;
 
+std::atomic<bool> g_audio_quiet{false};           // silencio (arranque automatico de game_state.cpp): se consumen las muestras igual
 static void sdl_callback(void*, Uint8* stream, int len) {
     s16* out = (s16*)stream;
     u32 want = len / 4;
@@ -52,6 +53,7 @@ static void sdl_callback(void*, Uint8* stream, int len) {
     u32 n = avail < want ? avail : want;
     for (u32 i = 0; i < n; i++) { u32 k = (u32)((rd + i) & (RING - 1)); out[2 * i] = g_ring[2 * k]; out[2 * i + 1] = g_ring[2 * k + 1]; }
     if (n < want) { memset(out + 2 * n, 0, (want - n) * 4); g_underruns++; }
+    if (g_audio_quiet.load(std::memory_order_relaxed)) memset(out, 0, (size_t)want * 4);
     g_rd.store(rd + n, std::memory_order_release);
 }
 

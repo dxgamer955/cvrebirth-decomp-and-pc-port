@@ -47,7 +47,12 @@ static void on_prof(int, siginfo_t*, void* uc_) {
 }
 static void print_samples() {
     if (!g_nsamples) return;
-    std::map<std::string, u32> hs; for (int i = 0; i < NRIP; i++) { if (!g_rip_k[i]) continue; struct { void* first; u32 second; } kv = { g_rip_k[i], g_rip_v[i] }; Dl_info di; std::string n = dladdr(kv.first, &di) && di.dli_sname ? di.dli_sname : "?"; hs[n] += kv.second; }
+    // Sin simbolo dinamico (funciones static del runtime, bibliotecas sin exportar): "?modulo+0xDESPL" agrupado por 256 bytes;
+    // los del ejecutable se resuelven fuera con `nm -C build/castlevania` (el desplazamiento es la direccion de nm en un PIE).
+    std::map<std::string, u32> hs; for (int i = 0; i < NRIP; i++) { if (!g_rip_k[i]) continue; struct { void* first; u32 second; } kv = { g_rip_k[i], g_rip_v[i] }; Dl_info di; std::string n;
+        if (dladdr(kv.first, &di) && di.dli_sname) n = di.dli_sname;
+        else if (di.dli_fname) { const char* b = strrchr(di.dli_fname, '/'); char t[160]; snprintf(t, sizeof t, "?%s+0x%zx", b ? b + 1 : di.dli_fname, ((size_t)((uintptr_t)kv.first - (uintptr_t)di.dli_fbase)) & ~(size_t)0xFF); n = t; }
+        else n = "?"; hs[n] += kv.second; }
     std::vector<std::pair<u32, std::string>> hv; for (auto& kv : hs) hv.push_back({kv.second, kv.first}); std::sort(hv.rbegin(), hv.rend());
     fprintf(stderr, "[muestreo] funciones del anfitrion:\n");
     for (size_t i = 0; i < hv.size() && i < 25; i++) fprintf(stderr, "  %5.1f%% %s\n", 100.0 * hv[i].first / g_nsamples, hv[i].second.c_str());
@@ -119,12 +124,26 @@ void rt_backtrace(int max) {
 
 [[noreturn]] void rt_fatal(const char* fmt, ...) {
     va_list ap; va_start(ap, fmt); fputs("[FATAL] ", stderr); vfprintf(stderr, fmt, ap); va_end(ap); fputc('\n', stderr);
+#ifdef _WIN32
+    if (!GetConsoleWindow()) {                     // ejecutable sin consola (paquete de Windows): el error se veria en ningun sitio
+        char msg[1024]; va_list ap2; va_start(ap2, fmt); vsnprintf(msg, sizeof msg, fmt, ap2); va_end(ap2);
+        MessageBoxA(nullptr, msg, "Castlevania: The Adventure ReBirth", MB_ICONERROR | MB_OK);
+    }
+#endif
     rt_backtrace();
     exit(2);
 }
 
 extern u32 g_vi_frames;
 void gx_stats_print(); void gx_render_stats();
+// Salida normal (rt_quit, gx_render.cpp): solo lo que se pidio por variables de entorno (perfil, muestreo)
+void rt_print_exit_stats() {
+#ifndef _WIN32
+    if (getenv("RT_SAMPLE")) { struct itimerval off; memset(&off, 0, sizeof off); setitimer(ITIMER_PROF, &off, nullptr); }
+#endif
+    if (g_profile) print_profile();
+    if (getenv("RT_SAMPLE")) print_samples();
+}
 static void on_interrupt(int sig) {
 #ifndef _WIN32
     struct itimerval off; memset(&off, 0, sizeof off); setitimer(ITIMER_PROF, &off, nullptr);

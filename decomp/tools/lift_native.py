@@ -45,8 +45,8 @@ class NativeLifter(Lifter):
         self.targets.add(t)
         return [f"TAILD(N_{t:08X});"]
 
-def trace_names():
-    p = f"{RT}/trace.txt"
+def trace_names(fname="trace.txt"):
+    p = f"{RT}/{fname}"
     return set(l.split("#")[0].strip() for l in open(p)) - {""} if os.path.exists(p) else set()
 
 def native_text(info, addr, name):
@@ -54,6 +54,7 @@ def native_text(info, addr, name):
     body = ["    " + l for l in info["lines"] if l]
     head = [f"// {name}", f"RetRegs N_{addr:08X}(NATIVE_PARAMS) {{", f"    RtFrame rtf_({addr:#x});", "    u32 r1 = g_sp;"]
     if name in TRACE: head.append(f"    rt_trace({addr:#x}, a0, a1, a2, a3);")
+    if name in HOOKS: head.append(f"    rt_hook({addr:#x}, a0, a1, a2, a3);")       # runtime/hooks.txt -> runtime/src/game_hooks.cpp
     decl = []
     for n in sorted(used_g - {1}):
         if 3 <= n <= 10: continue
@@ -86,10 +87,12 @@ def hle_names():
     return names
 
 TRACE = set()
+HOOKS = set()          # runtime/hooks.txt: functions that call rt_hook(addr, a0..a3) on entry (port features: stage select, save slots)
 
 def main():
-    global TRACE
+    global TRACE, HOOKS
     TRACE = trace_names()
+    HOOKS = trace_names("hooks.txt")
     shard = 120
     if "--shard" in sys.argv: shard = int(sys.argv[sys.argv.index("--shard") + 1])
     rd = load_dol()

@@ -100,6 +100,8 @@ say "Translating game.dol to C++ (runtime/gen)"
 "$PY" decomp/tools/lift_native.py > /dev/null
 say "Generating the system font"
 "$PY" scripts/make_osfont.py
+say "Extracting the game's font for the interface"
+"$PY" scripts/make_uifont.py
 
 # ---- 5. build ------------------------------------------------------------------------------------------------------------
 say "Building (-j$JOBS)"

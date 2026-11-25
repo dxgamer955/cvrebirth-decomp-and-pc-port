@@ -6,6 +6,14 @@
 #include <cstdio>
 #include <string>
 #include "gx.h"
+#include "game_state.h"
+#include <SDL2/SDL.h>
+#ifdef _WIN32
+#include <direct.h>
+#define chdir _chdir
+#else
+#include <unistd.h>
+#endif
 
 static void init_low_memory() {
     // Valores que deja el HLE de IOS de Dolphin para un titulo WiiWare (ver Source/Core/Core/IOS/IOS.cpp).
@@ -19,7 +27,7 @@ static void init_low_memory() {
     ST32(0x80003104, 0x01800000);         // MEM1 simulada
     ST32(0x80003108, 0x81800000);         // fin de MEM1
     ST32(0x8000310C, 0);                  // inicio del arena de MEM1
-    ST32(0x80003110, 0x81800000);         // fin del arena de MEM1
+    ST32(0x80003110, RT_SCRATCH);         // fin del arena de MEM1: los ultimos 4 KB quedan para el port (RT_SCRATCH, hle.h)
     ST32(0x80003118, 0x04000000);         // MEM2 fisica 64 MB
     ST32(0x8000311C, 0x04000000);
     ST32(0x80003120, 0x93400000);         // fin de MEM2
@@ -33,15 +41,43 @@ static void init_low_memory() {
 
 extern std::string g_files_root;
 extern std::string g_nand_root;
+extern std::string g_shared_root;
+bool g_wii_home = false;                   // RT_WII_HOME=1 y hay contenido compartido: la tecla HOME va al juego (menu HOME de la Wii)
+extern int g_argc; extern char** g_argv;   // home_menu.cpp (reiniciar)
 int main(int argc, char** argv) {
+    g_argc = argc; g_argv = argv;
+    // Sin argumentos (doble clic en Windows, paquete portable): si junto al ejecutable hay orig/game.dol, se trabaja desde esa
+    // carpeta (datos, partidas en nand/, settings.cfg y gen/osfont_ansi.bin), venga de donde venga el directorio de trabajo.
+    struct stat st;
+    if (argc <= 1) if (char* base = SDL_GetBasePath()) {
+        if (stat((std::string(base) + "orig/game.dol").c_str(), &st) == 0 && chdir(base) != 0) rt_log("[rt] no se pudo entrar en %s\n", base);
+        SDL_free(base);
+    }
     const char* dol = argc > 1 ? argv[1] : "orig/game.dol";
-    // Carpeta con los ficheros extraidos del juego: 2.o argumento, RT_FILES, ../orig/files si existe o la ruta local por defecto
+    if (stat(dol, &st) != 0)
+        rt_fatal("No se encuentra %s.\nCopia game.dol y la carpeta files (orig/ de tu compilacion) en una carpeta orig junto al ejecutable.\n"
+                 "%s not found: put game.dol and the files folder in an orig folder next to the executable.", dol, dol);
+    // Carpeta con los ficheros extraidos del juego: 2.o argumento, RT_FILES, orig/files o ../orig/files si existen, o la ruta local por defecto
     if (argc > 2) g_files_root = argv[2];
     else if (const char* f = getenv("RT_FILES")) g_files_root = f;
-    else { struct stat st; if (stat("../orig/files", &st) == 0) g_files_root = "../orig/files"; }
+    else if (stat("orig/files", &st) == 0) g_files_root = "orig/files";
+    else if (stat("../orig/files", &st) == 0) g_files_root = "../orig/files";
+    // Contenido compartido (menu HOME): 3.er argumento, RT_SHARED o la carpeta "shared" junto a la de los datos
+    if (argc > 3) g_shared_root = argv[3];
+    else if (const char* s = getenv("RT_SHARED")) g_shared_root = s;
+    else { size_t sl = g_files_root.find_last_of("/\\"); g_shared_root = (sl == std::string::npos ? std::string(".") : g_files_root.substr(0, sl)) + "/shared"; }
+    if (stat((g_shared_root + "/HomeButton3").c_str(), &st) != 0) g_shared_root.clear();
+    // Por defecto H abre el menu HOME propio del port (gx_render.cpp / home_menu.cpp). RT_WII_HOME=1 envia HOME al juego, que abre el
+    // de la Wii; necesita el contenido compartido (sin el, el juego muestra "Could not access Wii system memory").
+    if (getenv("RT_WII_HOME")) {
+        g_wii_home = !g_shared_root.empty();
+        if (!g_wii_home) rt_log("[rt] RT_WII_HOME: falta el contenido compartido del menu HOME de la Wii (carpeta shared junto a files); se usa el del port\n");
+    }
     if (const char* n = getenv("RT_NAND")) g_nand_root = n;
+
     rt_init_memory();
     gx_video_init();
+    game_state_startup();                                    // ranura o fase pendientes (cargar / selector de fases del menu HOME)
     rt_load_dol(dol);
     init_low_memory();
     RT_MTSPR(914, 0x00040004); RT_MTSPR(915, 0x00050005); RT_MTSPR(916, 0x00060006); RT_MTSPR(917, 0x00070007);   // GQR2-5 (OSInitFastCast)

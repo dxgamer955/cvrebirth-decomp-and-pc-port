@@ -4,18 +4,25 @@
 #include "hle.h"
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <sys/stat.h>
+#include <map>
 #include <vector>
 
 std::string g_files_root = "../tools/ModernGekko-Template/extracted/castlevania-rebirth/files";
+// Contenido compartido del titulo (indice 3 del TMD, tipo 0x8001): los recursos del menu HOME (HomeButton2/3) que la Wii guarda en
+// /shared1 de la NAND. Se extrae a "shared" junto a "files"; sin el, pulsar HOME muestra "Could not access Wii system memory".
+std::string g_shared_root;
 
 static std::vector<FILE*> g_fds(1, nullptr);
+static std::map<u32, u32> g_handle_content;       // direccion del CNTHandle del invitado -> indice de contenido
 
-// CNTInitHandle (0x800BB5D0): (directorio, handle, heap)
+// CNTInitHandle (0x800BB5D0): (indice de contenido, handle, heap). El juego usa el 2 (sus datos) y el 3 (el menu HOME).
 HLE_FN(CNTInitHandle) {
     ST8(a1 + 0x24, 3);                       // tipo propio: archivos del host
-    rt_log("[cnt] CNTInitHandle dir='%s'\n", a0 ? rt_guest_cstr(a0) : "(null)");
+    g_handle_content[a1] = a0;
+    rt_log("[cnt] CNTInitHandle contenido=%u\n", a0);
     return RET_I(0);
 }
 
@@ -24,9 +31,13 @@ HLE_FN(CNTReleaseHandle) { return RET_I(0); }
 
 // CNTOpen (0x800BB650): (handle, ruta, info) -> 0 = bien
 HLE_FN(CNTOpen) {
-    std::string path = g_files_root + "/" + rt_guest_cstr(a1);
-    rt_log("[cnt] abrir %s\n", rt_guest_cstr(a1));
+    auto hc = g_handle_content.find(a0);
+    bool shared = hc != g_handle_content.end() && hc->second == 3 && !g_shared_root.empty();
+    std::string path = (shared ? g_shared_root : g_files_root) + "/" + rt_guest_cstr(a1);
+    rt_log("[cnt] abrir %s%s\n", rt_guest_cstr(a1), shared ? " (compartido)" : "");
+    if (const char* bt = getenv("RT_CNT_BT")) if (strstr(rt_guest_cstr(a1), bt)) rt_backtrace(30);   // diagnostico: quien abre este archivo
     FILE* f = fopen(path.c_str(), "rb");
+    if (!f && shared) { path = g_files_root + "/" + rt_guest_cstr(a1); f = fopen(path.c_str(), "rb"); }   // por si acaso: tambien en los datos del juego
     if (!f) { rt_log("[cnt] CNTOpen: no existe '%s'\n", path.c_str()); return RET_I((u32)-0x1388); }
     struct stat st; stat(path.c_str(), &st);
     for (u32 o = 0; o < 0x44; o += 4) ST32(a2 + o, 0);

@@ -1,4 +1,4 @@
-# Castlevania: The Adventure ReBirth — estado del proyecto
+# Castlevania: The Adventure ReBirth: estado del proyecto
 
 Meta: decomp del WiiWare original para hacer un PC port.
 
@@ -9,10 +9,10 @@ Meta: decomp del WiiWare original para hacer un PC port.
    normal. El contenido decodificado queda en
    `~/.local/share/dolphin-emu/Wii/title/00010001/57443945/content/`.
    - `00000004.app` = `main.dol` real (entry point `0x81330000`, compilado con
-     Metrowerks CodeWarrior — confirmado por símbolos `_savegpr_XX`/`_SDA_BASE_`).
+     Metrowerks CodeWarrior, confirmado por símbolos `_savegpr_XX`/`_SDA_BASE_`).
    - `00000007.app` = banner (IMET), contiene el string interno
      `wiidracula.0911021432` (nombre de proyecto + fecha de build, 2009-11-02).
-   - `00000008.app` = sin identificar aún (no es un apploader real — WiiWare no
+   - `00000008.app` = sin identificar aún (no es un apploader real; WiiWare no
      usa apploader de disco).
    - `00000009.app` = archivo U8 (32MB) con los assets: mapas `.psb.l`
      (formato de script, sugiere motor de M2), audio `.brsar`/`.brstm`.
@@ -24,24 +24,24 @@ Meta: decomp del WiiWare original para hacer un PC port.
    (`build/main_patched.dol`) para que las herramientas de análisis lo acepten.
 
 3. **DolRecomp** (`github.com/ExpansionPak/DolRecomp`): recompilador estático
-   que traduce el PowerPC del DOL directamente a C — no requiere el compilador
+   que traduce el PowerPC del DOL directamente a C, no requiere el compilador
    CodeWarrior original (bloqueante inicial del proyecto). Genera ~654K líneas
    de C a partir de 77,760 instrucciones (806 "desconocidas", pendiente
    investigar).
 
 4. **ModernGekko-Template** (`github.com/ExpansionPak/ModernGekko-Template`):
    runtime basado en el núcleo de Dolphin que compila el C generado en un
-   módulo nativo (`.so`) y lo ejecuta. **Funciona — el juego corre y es
+   módulo nativo (`.so`) y lo ejecuta. **Funciona: el juego corre y es
    jugable** (confirmado: Stage 1, HUD, física, controles).
 
 ## Bugs encontrados y arreglados en ModernGekko (ver `patches/moderngekko-wiiware-boot.patch`)
 
 Todos en `tools/ModernGekko-Template/lib/ModernGekko/src/runtime/dolphin_runtime.cpp`
-(repo clonado, gitignored — por eso el patch se guarda aparte).
+(repo clonado, gitignored, por eso el patch se guarda aparte).
 
 1. **Crash de ImGui** (`WaitForShadersBeforeStarting` forzado a `true`): la
    barra de progreso "Compiling Shaders" llama `ImGui::GetIO()` antes de que
-   exista el contexto de ImGui → `SIGILL`. Cambiado a `false`.
+   exista el contexto de ImGui -> `SIGILL`. Cambiado a `false`.
 
 2. **Detección errónea de "disco extraído"**: la carpeta `sys/boot.bin` +
    `files/` (requerida por la propia validación de `moderngekko-port`) hace
@@ -57,12 +57,12 @@ Todos en `tools/ModernGekko-Template/lib/ModernGekko/src/runtime/dolphin_runtime
    - Copiar `title/00010001/57443945/{content,data}` y
      `ticket/00010001/57443945.tik` desde el NAND de Dolphin.
    - Agregar la entrada del título a `sys/uid.sys` (12 bytes:
-     title_id_high + title_id_low + uid, formato big-endian u32×3).
+     title_id_high + title_id_low + uid, formato big-endian u32 x3).
 
 4. **Controles**: `~/.local/share/moderngekko/Config/WiimoteNew.ini` no
    existía. Se creó manualmente (Dolphin no trae un perfil por defecto en
    este frontend). El D-Pad necesitó mapeo rotado porque el juego se sostiene
-   con el Wiimote de lado — mapeo final funcional:
+   con el Wiimote de lado; mapeo final funcional:
    ```ini
    D-Pad/Up = `Down`
    D-Pad/Down = `Up`
@@ -337,6 +337,12 @@ el titulo y la introduccion con texto y arte, a ~60 fotogramas/s.
   RT_AUTO_PTR=x,y`.
 - Fuente del sistema (OSFont): `scripts/make_osfont.py` rasteriza una TTF libre del equipo a
   `runtime/gen/osfont_ansi.bin`; `hle_font.cpp` sustituye `OSInitFont` (la ROM de fuentes es de Nintendo).
+- Fuente de la interfaz del port (menu HOME, F3, FPS, "LOADING..."): la de 8x8 del HUD del juego. `scripts/make_uifont.py`
+  lee `font/small1.psb.l` de tu copia (mdf + zlib; arbol PSB v2 de M2; textura CI8 en teselas 8x4 con paleta RGB5A3), dibuja
+  en el mismo estilo los signos que le faltan (`< > / ( ) + ! ? ' " ; %`) y escribe `runtime/gen/ui_gamefont.h` (no se
+  sube: es del juego). El Makefile lo genera si falta; sin el, o con `RT_UI_FONT=builtin`, se usa la fuente 5x7 integrada.
+  Las otras fuentes del juego: `small2/3` (las mismas letras en otros colores), `font_jp`/`font_jp2` (proporcionales de 24 y
+  16 px con kana y kanji) y `font_point`. Prueba: `RT_UI_SHOT=prefijo` captura la ventana con el menu HOME abierto.
 - Audio (`audio_hw.cpp`, `audio_ax.cpp`, `include/audio.h`): el SDK real (AIInit, AXInit, DSP, NW4R SND) corre elevado tal cual
   y solo se emula el hardware de debajo. Registros de AI (`0xCD006C00`: AICR/AIVR/contador) y del DSP (`0xCC005000`:
   buzones CPU<->DSP, DSPCR, DMA de AI en `0x5030/32/36`). El DSP se emula sin microcodigo: la CPU "arranca" la tarea con los
@@ -386,6 +392,52 @@ el titulo y la introduccion con texto y arte, a ~60 fotogramas/s.
   recalcular el estado si no se escribio ningun registro BP relevante desde el dibujo anterior (`g_state_dirty`). Efecto: la presentacion/VSync ya no
   bloquea al juego y el coste por fotograma baja (Linux sin limite: ~65 -> ~92 fps de juego). `RT_FPS` muestra ahora "hilo de render" y las secciones
   de `gx_draw`. Solo `RT_HEADLESS=1` ejecuta las tareas al instante.
+- Rendimiento (2026-11-24): margen por fotograma en el Stage 1 (Linux, i7-1165G7, sin limite, mediana) de ~115 a ~194 fps de juego
+  (~8,7 -> ~5,2 ms de los 16,7 ms; cuanto mas margen, menos tirones cuando el sistema quita CPU un momento). Causas: (1) cada fotograma
+  se hasheaban ~1,7 MB de texturas con FNV byte a byte (~2 ms); ahora `hash_bytes` usa rondas de xxHash64 en 4 carriles (`gx_render.cpp`).
+  (2) Las escrituras de 1 y 2 bytes al FIFO de GX iban por `rt_mmio_write`; ahora `ST8/ST16` tienen la misma ruta inline que `ST32`
+  (`GXF8/GXF16`, `native_lift.h`). (3) El formato de vertice se recalculaba en cada dibujo; ahora se guarda por VAT y se rehace al escribir
+  VCD/VAT (`gx_fifo.cpp`). `RT_FPS` muestra ademas lotes, KB de textura hasheados y paletas hasheadas por fotograma; `RT_SAMPLE` nombra las
+  direcciones sin simbolo como `?modulo+0xDESPL` (las del ejecutable se resuelven con `nm -C`).
+- Retrazado acompasado al monitor (2026-11-24): con vsync y una pantalla de 58-62 Hz, el VI ya no lo marca el reloj de 59,94 Hz (temporizador
+  de 1 ms) sino cada intercambio terminado en el hilo de render (`g_vblank_ticks`/`g_disp_sync`, `gx_render.cpp` y `hle_vi.cpp`). Con el reloj, la
+  fase entre VI y monitor se desplazaba (~0,017 ms por fotograma a 60,00 Hz) y cada ~17 s, durante ~2 s, fotogramas repetidos/saltados aunque el
+  contador marcara 60. Salvaguardas: minimo 12 ms entre retrazados, respaldo a los 50 ms y, si la mediana de 30 retrazados baja de 15 ms (el
+  intercambio no frena: vsync ignorado, VRR), vuelta al reloj con un aviso `[vi]`. Sin vsync, sin limite o con otras frecuencias (p. ej. 144 Hz)
+  se usa el reloj como antes; `RT_VI_TIMER=1` lo fuerza. `RT_FPS` muestra el histograma de intervalos entre intercambios. Probado en Linux
+  (59,96 Hz): VI 60,0, intercambios regulares, audio sin cambios; con `vblank_mode=0` la salvaguarda vuelve al reloj en ~0,5 s.
+- Menu HOME (2026-11-24): pulsar HOME (H) mostraba "Could not access Wii system memory". El juego abre los recursos del menu HOME de
+  la Wii con `CNTInitHandle(3)`: el contenido 3 del TMD es de tipo 0x8001 (compartido, `/shared1` de la NAND; `HomeButton2/3`,
+  `LZ77_homeBtn_ENG.arc`...) y no esta en `orig/files` (solo el contenido 2). `hle_cnt.cpp` ahora recuerda el indice de contenido de cada
+  handle (el log antiguo `dir='9E'/'E'` era ese indice leido como cadena) y sirve el 3 desde `shared` junto a `files`. Por defecto H (y el
+  boton central del mando) abre un menu HOME propio (`home_menu.cpp`): pausa juego y audio, Resume / Settings / Reset (vuelve a lanzar el
+  ejecutable; en Linux execv de /proc/self/exe parando antes los temporizadores) / Quit, y creditos (autor DXG95, build de
+  `gen/build_info.h` = `git describe` + fecha, compilador, herramientas). `RT_WII_HOME=1` envia HOME al juego (necesita `shared`).
+  Prueba: `RT_TEST_HOME=fotograma:accion`. Salir (ventana o menu) usa `std::_Exit`: `exit()` se colgaba en destructores globales.
+- Guardado y selector de fases (2026-11-24): el menu HOME tiene Save / Load con 5 ranuras (texto `saves/slotN.sav` + miniatura
+  `slotN.ppm` 160x120 del XFB, junto a la carpeta de la NAND) y el codigo Konami (arriba arriba abajo abajo izquierda derecha izquierda
+  derecha B A) abre STAGE SELECT. No hay guardado exacto del instante (los registros del juego viven en la pila nativa); una ranura
+  guarda el ultimo punto restaurable y los datos del jugador. Hallazgos (runtime + codigo elevado):
+  - `*(0x80316480)` = objeto de partida (vtable 0x80244820): +0x1c vidas, +0x20 puntuacion, +0x28 fase 1-6 (HUD "STAGE %d"),
+    +0x2c tiempo en fotogramas, +0x1fc subarma, +0x200 nivel del latigo (persisten entre mapas y fases), +0x48.. copia de bak000.
+  - `*(0x8031647C)` = gestor de campo (`DrcDebugPrimitive`, nombre de RTTI mal asignado): +0x168 mapa actual, +0x174 entrada, +0x2b4
+    mapa anterior, +0x220 jugador (vtable 0x802530E0: +0x78/+0x7c posicion, +0x204 vida float, +0x208 corazones, +0x20c latigo, +0x234 subarma).
+  - `fn_8002A700(obj)` lee de setting.csv `stage_start` (6 entradas "mapa:entrada", vector en obj+0xc8) y `start_map` (lista de
+    depuracion, 107 entradas, obj+0xd4); `fn_8002BF50(obj)` empieza partida: fase = obj+0xc4 (0 = nueva desde la fase 1 con demo),
+    ajuste start_map = stage_start[fase-1]; el gestor de campo lee start_map al construirse; `fn_8009F0C0` inicializa el jugador
+    (vida llena, corazones segun dificultad, subarma/latigo desde la partida). Los recursos de la fase salen del nombre del mapa.
+  - Ganchos de entrada (`runtime/hooks.txt` -> `rt_hook`, `game_hooks.cpp`): fn_8002BF50 (fase pedida), DrcDebugPrimitive_ctor
+    (start_map pedido via `N_800AD0F0(ajustes, "start_map", valor)` con la cadena en RT_SCRATCH = 4 KB al final de MEM1 quitados del
+    arena) y fn_8009F0C0 (jugador vivo: justo tras el gestor, +0x220 aun apunta al jugador anterior liberado; escribir ahi colgaba
+    la inicializacion del motor).
+  - Punto restaurable (`game_state.cpp`): al llegar a un mapa, "mapa:entrada" con una entrada de la lista start_map elegida por la
+    posicion de llegada (borde izquierdo -> link_l, arriba -> link_u, si no link_r/link_d); 83 de 101 mapas tienen entrada (no las
+    salas de jefe ni algunas secretas: se guarda el mapa anterior). `st1_map3:link_r` cruza solo a st1_mboss (comportamiento del juego).
+  - Cargar / selector: `RT_LOAD_SLOT` / `RT_START_STAGE` y `rt_restart`; el proceso nuevo pulsa "confirmar" (`gx_input_buttons`) con
+    `gx_fast_forward` (sin limite ni vsync, ~540 fps, audio en silencio y pantalla LOADING) hasta el gestor de campo: ~2 s.
+  - Diagnostico nuevo: `RT_MEMDUMP=f1,f2` (+`RT_MEMDUMP_PREFIX`) vuelca MEM1+MEM2; `RT_CNT_BT=texto` pila del juego al abrir ese
+    archivo; `RT_TEST_STAGE`/`RT_TEST_MAP`; `RT_TEST_HOME=fotograma:teclas` (L R U D C X B A). Pendiente: dificultad (no se guarda);
+    poner nombre a fn_8002A700/fn_8002BF50/fn_8009F0C0 (renames.txt; actualizar tambien runtime/hooks.txt).
 - Segundo plano: al perder el foco, ocultarse o minimizarse la ventana (p. ej. cambiar de espacio de trabajo) el juego y el audio se
   pausan (`pause_bg`, ajuste del menu F3) y el tiempo en pausa se descuenta del reloj del juego (`rt_time_skip`); antes el reloj saltaba al volver
   y el intercambio de buffers de una ventana oculta podia bloquearse. Prueba sin ventana: `RT_TEST_PAUSE=<fotograma>`.
@@ -500,7 +552,7 @@ investigar. Por eso las pruebas se hacen con Unicorn (arriba).
 - Investigar las 806 instrucciones "desconocidas" que DolRecomp no pudo
   decodificar.
 - Verificar que los assets (sonido, niveles) carguen desde donde el juego
-  realmente los busca — por ahora están en `extracted/castlevania-rebirth/files/`
+  realmente los busca; por ahora están en `extracted/castlevania-rebirth/files/`
   pero no está confirmado que el juego los lea de ahí correctamente (podría
   explicar diferencias de audio/timing).
 - Investigar formato PSB (scripts del motor, usado extensivamente en los

@@ -4,6 +4,8 @@
 #include "hle.h"
 #include "pad.h"
 #include "ui_font.h"
+#include "home_menu.h"
+#include "game_state.h"
 #include "tex_decode.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -53,7 +55,7 @@ static int g_sc = 1;                                          // factor de resol
 #define EFB_H (LH * g_sc)
 struct Settings { int show_fps = 0, vsync = 0, unlimited = 0, screen_filter = 1, tex_filter = 0, scale = 1, fullscreen = 0, pause_bg = 1; };   // menu F3
 static Settings g_set;
-struct PresentInfo { Settings set; bool show_fps; bool menu_open; int menu_sel; char fps_text[32]; int frame; };   // lo que el hilo de render necesita para presentar
+struct PresentInfo { Settings set; bool show_fps; bool menu_open; int menu_sel; char fps_text[32]; int frame; bool home_open; HomeView home; bool loading; };   // lo que el hilo de render necesita para presentar
 static bool g_menu_open = getenv("RT_MENU") != nullptr, g_filter_dirty = true;
 static int g_filter_applied = -1;
 static void settings_load();
@@ -102,7 +104,28 @@ static u32 tex_bytes(u32 fmt, int w, int h) {
     }
     return 0;
 }
-static u64 hash_bytes(const u8* p, size_t n) { u64 h = 1469598103934665603ull; for (size_t i = 0; i < n; i++) { h ^= p[i]; h *= 1099511628211ull; } return h; }
+u64 g_batches = 0, g_hashed_bytes = 0, g_pal_hashes = 0;          // contadores de diagnostico (RT_FPS): lotes encolados, bytes de textura hasheados, paletas hasheadas
+// Hash del contenido de texturas y paletas para detectar cambios. Cada fotograma se hashean ~1,7 MB en el Stage 1: con FNV byte a
+// byte eran ~2 ms por fotograma del hilo del juego. Rondas de xxHash64 en 4 carriles independientes (32 bytes por vuelta).
+static inline u64 rotl64(u64 x, int r) { return (x << r) | (x >> (64 - r)); }
+static u64 hash_bytes(const u8* p, size_t n) {
+    g_hashed_bytes += n;
+    const u64 P1 = 0x9E3779B185EBCA87ull, P2 = 0xC2B2AE3D27D4EB4Full, P3 = 0x165667B19E3779F9ull, P4 = 0x85EBCA77C2B2AE63ull;
+    auto round = [&](u64 acc, u64 w) { return rotl64(acc + w * P2, 31) * P1; };
+    auto merge = [&](u64 h, u64 v) { return (h ^ round(0, v)) * P1 + P4; };
+    const u8* end = p + n; u64 h;
+    if (n >= 32) {
+        u64 v1 = P1 + P2, v2 = P2, v3 = 0, v4 = 0 - P1;
+        for (; p + 32 <= end; p += 32) { u64 w[4]; memcpy(w, p, 32); v1 = round(v1, w[0]); v2 = round(v2, w[1]); v3 = round(v3, w[2]); v4 = round(v4, w[3]); }
+        h = rotl64(v1, 1) + rotl64(v2, 7) + rotl64(v3, 12) + rotl64(v4, 18);
+        h = merge(h, v1); h = merge(h, v2); h = merge(h, v3); h = merge(h, v4);
+    } else h = P3;
+    h += (u64)n;
+    for (; p + 8 <= end; p += 8) { u64 w; memcpy(&w, p, 8); h = rotl64(h ^ round(0, w), 27) * P1 + P4; }
+    for (; p < end; p++) h = rotl64(h ^ (*p * 0x27D4EB2F165667C5ull), 11) * P1;
+    h ^= h >> 33; h *= P2; h ^= h >> 29; h *= P3; h ^= h >> 32;
+    return h;
+}
 
 static void flush_batch();                                   // encola los vertices acumulados (gx_draw)
 static void batch_invalidate() {}
@@ -123,7 +146,7 @@ static TexRef get_texture(int map) {
     // La paleta (pequena) se hashea siempre; el contenido de la textura, una sola vez por fotograma de VI y textura
     // (hashear MB enteros en cada dibujo hundia el juego a ~1 fps).
     u64 tlh = 0;
-    if (fmt >= 8 && fmt <= 10) { auto tt = g_tlut.find(tlutKey); if (tt != g_tlut.end()) tlh = hash_bytes((const u8*)tt->second.data(), tt->second.size() * 2); }
+    if (fmt >= 8 && fmt <= 10) { auto tt = g_tlut.find(tlutKey); if (tt != g_tlut.end()) g_pal_hashes++, tlh = hash_bytes((const u8*)tt->second.data(), tt->second.size() * 2); }
     r.kind = 1;
     if (it != g_texcache.end() && it->second.frame == g_vi_frames && it->second.tlh == tlh) { r.key = it->second.handle; return r; }
     u64 hsh = hash_bytes(HP(addr | 0x80000000u), nb) ^ tlh;
@@ -424,7 +447,7 @@ void gx_draw(u32 prim, u32 vat, const GxVertex* v, u32 count) {
 }
 
 static void flush_batch() {
-    if (g_cur && g_cur->n) { std::shared_ptr<Batch> b = g_cur; rq_push([b] { exec_draw(*b); }); }
+    if (g_cur && g_cur->n) { g_batches++; std::shared_ptr<Batch> b = g_cur; rq_push([b] { exec_draw(*b); }); }
     g_cur.reset();
 }
 
@@ -550,6 +573,13 @@ static void settings_apply(bool initial) {
     }
 }
 
+// Avance rapido (arranque automatico de game_state.cpp): sin limite de fotogramas y sin vsync; al terminar, los ajustes del menu F3
+void gx_fast_forward(bool on) {
+    if (on) { g_vi_uncapped = true; if (g_win) rq_push([] { SDL_GL_SetSwapInterval(0); }); return; }
+    g_vi_uncapped = g_set.unlimited != 0 || getenv("RT_UNCAPPED") != nullptr;
+    int vs = g_set.vsync ? 1 : 0; if (g_win) rq_push([vs] { SDL_GL_SetSwapInterval(vs); });
+}
+
 static const char* const MENU_NAMES[] = { "FPS COUNTER", "VSYNC", "FRAME LIMIT", "SCREEN FILTER", "TEXTURE FILTER", "RESOLUTION", "WINDOW", "PAUSE IN BACKGROUND", "CLOSE" };
 static const int MENU_N = 9;
 static Settings r_set; static int r_menu_sel = 0;              // copia de los ajustes / seleccion del menu que ve el hilo de render
@@ -583,8 +613,9 @@ static void menu_change(int i, int dir) {
 }
 static void menu_draw(int w, int h) {
     int sc = h >= 1000 ? 4 : (h >= 700 ? 3 : 2);
-    while (sc > 1 && (46 * 6 + 12) * sc > w) sc--;                  // que el panel quepa en ventanas estrechas
-    float lh = 11.f * sc, pad = 6.f * sc, tw = 46 * 6 * sc;
+    const int cw = ui_char_w(), ch = ui_char_h();
+    while (sc > 1 && (46 * cw + 12) * sc > w) sc--;                 // que el panel quepa en ventanas estrechas
+    float lh = (ch + 4.f) * sc, pad = 6.f * sc, tw = 46.f * cw * sc;
     float pw = tw + 2 * pad, ph = lh * (MENU_N + 3) + 2 * pad, px = (w - pw) / 2, py = (h - ph) / 2;
     ui_rect(px - sc, py - sc, pw + 2 * sc, ph + 2 * sc, 0.9f, 0.8f, 0.2f, 1.f);
     ui_rect(px, py, pw, ph, 0.04f, 0.04f, 0.12f, 0.92f);
@@ -593,10 +624,10 @@ static void menu_draw(int w, int h) {
         char val[48]; menu_value(i, val, sizeof val); float y = py + pad + lh * (i + 1.5f); bool sel = i == r_menu_sel;
         float cr = sel ? 1.f : 0.85f, cg = sel ? 0.95f : 0.85f, cb = sel ? 0.3f : 0.85f;
         if (sel) ui_text(px + pad, y, sc, ">", cr, cg, cb);
-        ui_text(px + pad + 2 * 6 * sc, y, sc, MENU_NAMES[i], cr, cg, cb);
+        ui_text(px + pad + 2.f * cw * sc, y, sc, MENU_NAMES[i], cr, cg, cb);
         if (val[0]) { char buf[64]; snprintf(buf, sizeof buf, "%s%s%s", sel ? "< " : "  ", val, sel ? " >" : ""); ui_text(px + pad + tw - ui_text_width(buf, sc), y, sc, buf, cr, cg, cb); }
     }
-    ui_text(px + pad, py + ph - pad - 7 * sc, sc, "UP/DOWN SELECT  LEFT/RIGHT CHANGE  F3 CLOSE", 0.6f, 0.7f, 0.9f);
+    ui_text(px + pad, py + ph - pad - ch * sc, sc, "UP/DOWN SELECT  LEFT/RIGHT CHANGE  F3 CLOSE", 0.6f, 0.7f, 0.9f);
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -709,6 +740,8 @@ static void render_copy(u32 value, const u32* bp) {
     }
 }
 
+extern std::atomic<bool> g_disp_sync; extern std::atomic<int> g_vblank_ticks; extern bool g_disp_sync_bad; extern volatile int g_irq_pending;
+std::atomic<unsigned> g_swap_hist[4];                          // intervalos entre intercambios: <12 ms, 12-21, 21-30, >30 (RT_FPS)
 static void render_present(const PresentInfo& pi) {
     g_rstate_valid = false;
     r_set = pi.set; r_menu_sel = pi.menu_sel;
@@ -735,11 +768,23 @@ static void render_present(const PresentInfo& pi) {
     glUseProgram(prog); glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_xfb_tex); glUniform1i(glGetUniformLocation(prog, "t"), 0);
     if (g_filter_dirty || pi.set.screen_filter != g_filter_applied) { GLint f = pi.set.screen_filter ? GL_LINEAR : GL_NEAREST; glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f); g_filter_dirty = false; g_filter_applied = pi.set.screen_filter; }
     glBindVertexArray(vao); glDrawArrays(GL_TRIANGLES, 0, 3);
-    if (pi.show_fps || pi.menu_open) {
+    if (pi.show_fps || pi.menu_open || pi.home_open || pi.loading) {
         ui_begin(w, h);
-        if (pi.show_fps) { int sc = h >= 1000 ? 4 : (h >= 500 ? 3 : 2); ui_text((float)(4 * sc), (float)(4 * sc), sc, pi.fps_text, 1.f, 0.95f, 0.2f); }
+        if (pi.loading) {                                           // arranque automatico (cargar ranura / selector de fases): tapa los menus que pasan rapido
+            int sc = h >= 1000 ? 4 : (h >= 700 ? 3 : 2); ui_rect(0, 0, (float)w, (float)h, 0.f, 0.f, 0.f, 1.f);
+            const char* t = "LOADING..."; ui_text((w - ui_text_width(t, sc)) / 2, (h - (float)ui_char_h() * sc) / 2, sc, t, 1.f, 0.85f, 0.35f);
+        }
+        if (pi.home_open) home_draw(w, h, pi.home);
+        if (pi.show_fps && !pi.home_open) { int sc = h >= 1000 ? 4 : (h >= 500 ? 3 : 2); ui_text((float)(4 * sc), (float)(4 * sc), sc, pi.fps_text, 1.f, 0.95f, 0.2f); }
         if (pi.menu_open) menu_draw(w, h);
         glDisable(GL_BLEND);
+    }
+    static const char* ui_shot = getenv("RT_UI_SHOT");              // prueba: RT_UI_SHOT=prefijo captura la ventana con el menu HOME abierto
+    static int ui_shot_n = 0;                                       // (una de cada 20 presentaciones: prefijo0.ppm, prefijo1.ppm...)
+    if (ui_shot && pi.home_open && ui_shot_n++ % 20 == 10) {
+        std::vector<u8> px((size_t)w * h * 4); glBindFramebuffer(GL_FRAMEBUFFER, 0); glReadBuffer(GL_BACK); glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+        FILE* f = fopen((std::string(ui_shot) + std::to_string(ui_shot_n / 20) + ".ppm").c_str(), "wb");
+        if (f) { fprintf(f, "P6 %d %d 255\n", w, h); for (int y = h - 1; y >= 0; y--) for (int x = 0; x < w; x++) fwrite(&px[((size_t)y * w + x) * 4], 1, 3, f); fclose(f); }
     }
     if (dump) {                                                    // captura de la ventana (con el contador)
         std::vector<u8> px((size_t)w * h * 4); glBindFramebuffer(GL_FRAMEBUFFER, 0); glReadBuffer(GL_BACK); glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
@@ -747,6 +792,12 @@ static void render_present(const PresentInfo& pi) {
         for (int y = h - 1; y >= 0; y--) for (int x = 0; x < w; x++) fwrite(&px[((size_t)y * w + x) * 4], 1, 3, f); fclose(f);
     }
     SDL_GL_SwapWindow(g_win);
+    if (g_disp_sync.load(std::memory_order_relaxed)) { g_vblank_ticks.fetch_add(1, std::memory_order_relaxed); g_irq_pending = 1; }   // retrazado acompasado al monitor (hle_vi.cpp)
+    {   // ritmo real de presentacion (RT_FPS): intervalo entre intercambios; con vsync a 60 Hz deberian ser todos ~16,7 ms
+        double t = now_s(); static double last = 0;
+        if (last > 0) { double ms = (t - last) * 1000; g_swap_hist[ms < 12 ? 0 : ms < 21 ? 1 : ms < 30 ? 2 : 3]++; }
+        last = t;
+    }
 }
 
 static void render_thread_main() {
@@ -760,6 +811,148 @@ static void render_thread_main() {
         g_q_room.notify_all();
         double t0 = now_s(); f(); g_t_render += now_s() - t0;
     }
+}
+
+static int g_last_fps_shown = 0;
+static PresentInfo base_present_info() {
+    PresentInfo pi; memset(&pi, 0, sizeof pi);
+    pi.set = g_set; pi.show_fps = g_show_fps; pi.menu_open = false; pi.menu_sel = g_menu_sel; pi.frame = ++g_frame_no;
+    snprintf(pi.fps_text, sizeof pi.fps_text, "FPS %d", g_last_fps_shown);
+    return pi;
+}
+// Salida: _Exit sin destructores globales (con el hilo de render y el audio vivos, exit() se quedaba colgado en ellos). Las partidas
+// y los ajustes ya estan escritos; el muestreo de RT_SAMPLE se imprime aqui porque no hay atexit.
+[[noreturn]] static void rt_quit(const char* why) {
+    fprintf(stderr, "[rt] %s\n", why);
+    extern void rt_print_exit_stats(); rt_print_exit_stats();
+    fflush(stdout); fflush(stderr);
+    std::_Exit(0);                                               // (cstdlib: tambien en MinGW)
+}
+// ---- menu HOME propio (H / boton central): pausa el juego y el audio como al perder el foco ----
+static bool g_home_request = false;
+static bool g_input_hold = false;                                 // tras cerrar un menu, los botones no llegan al juego hasta soltarlos
+
+// Miniatura del ultimo fotograma del juego (el XFB, sin el menu encima) a THUMB_W x THUMB_H RGB, en el hilo de render
+static std::vector<u8> gx_capture_thumb() {
+    if (!g_gl_ready) return {};
+    auto out = std::make_shared<std::vector<u8>>();
+    auto done = std::make_shared<std::atomic<bool>>(false);
+    rq_push([out, done] {
+        int W = EFB_W, H = EFB_H; std::vector<u8> px((size_t)W * H * 4);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, g_xfb_fbo); glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+        out->assign((size_t)THUMB_W * THUMB_H * 3, 0);
+        for (int ty = 0; ty < THUMB_H; ty++) for (int tx = 0; tx < THUMB_W; tx++) {
+            int x0 = tx * W / THUMB_W, x1 = (tx + 1) * W / THUMB_W, y0 = ty * H / THUMB_H, y1 = (ty + 1) * H / THUMB_H; u32 acc[3] = {}, n = 0;
+            for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) { const u8* p = &px[((size_t)(H - 1 - y) * W + x) * 4]; acc[0] += p[0]; acc[1] += p[1]; acc[2] += p[2]; n++; }
+            for (int c = 0; c < 3; c++) (*out)[((size_t)ty * THUMB_W + tx) * 3 + c] = (u8)(n ? acc[c] / n : 0);
+        }
+        g_rstate_valid = false;
+        done->store(true);
+    });
+    while (!done->load()) SDL_Delay(1);
+    return *out;
+}
+// Lee las ranuras del disco y las pasa al hilo de render (miniaturas como texturas)
+static void home_refresh_slots() {
+    for (int i = 0; i < SAVE_SLOTS; i++) {
+        SlotInfo si; auto rgb = std::make_shared<std::vector<u8>>();
+        bool used = game_slot_read(i, si, rgb.get());
+        auto L = std::make_shared<std::array<std::string, 4>>();
+        (*L)[0] = "SLOT " + std::to_string(i + 1);
+        if (used) { char b[64]; snprintf(b, sizeof b, "STAGE %d   P %u", si.stage, si.lives); (*L)[1] = b; snprintf(b, sizeof b, "SCORE %07u", si.score); (*L)[2] = b; (*L)[3] = si.date; }
+        else (*L)[1] = "EMPTY";
+        rq_push([i, used, rgb, L] { const char* l[4] = { (*L)[0].c_str(), (*L)[1].c_str(), (*L)[2].c_str(), (*L)[3].c_str() }; home_slot_set(i, used, *rgb, l); });
+    }
+}
+static void home_menu_run() {
+    extern void rt_time_skip(double); extern void audio_pause(bool, double);
+    double t0 = now_s(); audio_pause(true, 0);
+    rt_log("[home] menu abierto\n");
+    HomeView hv; memset(&hv, 0, sizeof hv); hv.view = HOME_VIEW_MAIN; hv.sel = HOME_RESUME; hv.stage = 1;
+    int action = -1;                                               // HOME_RESUME/SETTINGS/RESET/QUIT; 100 + ranura = cargar; 200 + fase = selector
+    auto msg = [&](const char* m) { snprintf(hv.msg, sizeof hv.msg, "%s", m); };
+    // Prueba sin teclado: RT_TEST_HOME=fotograma:teclas (L R U D = direcciones, C = confirmar, X = atras, B / A = botones B / A del
+    // mando); una tecla cada 20 vueltas desde la 30. Ej.: "1500:RCRC" guarda en la ranura 2; "1500:UUDDLRLRBA" abre el selector.
+    static const char* test = getenv("RT_TEST_HOME"); const char* tkeys = test ? strchr(test, ':') : nullptr; if (tkeys) tkeys++;
+    static const char KONAMI[] = "UUDDLRLRBA"; int kprog = 0;      // arriba arriba abajo abajo izquierda derecha izquierda derecha B A
+    bool prev[8] = {}; bool first = true;
+    for (int it = 0; action < 0; it++) {
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) { if (e.type == SDL_QUIT) rt_quit("ventana cerrada"); pad_event(e); }
+        const u8* k = SDL_GetKeyboardState(nullptr); bool l, r, u, d; pad_dirs(l, r, u, d);
+        bool padA = pad_btn(SDL_CONTROLLER_BUTTON_A), padB = pad_btn(SDL_CONTROLLER_BUTTON_B);
+        // 0 izquierda, 1 derecha, 2 arriba, 3 abajo, 4 confirmar, 5 atras/cerrar, 6 B (codigo), 7 A (codigo)
+        bool now[8] = { k[SDL_SCANCODE_LEFT] || k[SDL_SCANCODE_A] || l, k[SDL_SCANCODE_RIGHT] || k[SDL_SCANCODE_D] || r,
+                        k[SDL_SCANCODE_UP] || k[SDL_SCANCODE_W] || u, k[SDL_SCANCODE_DOWN] || k[SDL_SCANCODE_S] || d,
+                        k[SDL_SCANCODE_RETURN] || k[SDL_SCANCODE_SPACE] || k[SDL_SCANCODE_X] || k[SDL_SCANCODE_2] || padA,
+                        k[SDL_SCANCODE_ESCAPE] || k[SDL_SCANCODE_H] || padB || pad_btn(SDL_CONTROLLER_BUTTON_GUIDE),
+                        k[SDL_SCANCODE_B] || padB, k[SDL_SCANCODE_A] || padA };
+        if (first) { memcpy(prev, now, sizeof prev); first = false; }          // lo que ya estaba pulsado al abrir no cuenta
+        bool ed[8]; for (int i = 0; i < 8; i++) { ed[i] = now[i] && !prev[i]; prev[i] = now[i]; }
+        if (tkeys && *tkeys && it >= 30 && (it - 30) % 20 == 0) {
+            switch (*tkeys++) { case 'L': ed[0] = true; break; case 'R': ed[1] = true; break; case 'U': ed[2] = true; break; case 'D': ed[3] = true; break;
+                                case 'C': ed[4] = true; break; case 'X': ed[5] = true; break; case 'B': ed[5] = ed[6] = true; break; case 'A': ed[4] = ed[7] = true; break; }
+        }
+        // Codigo Konami (selector de fases secreto): B y A del final no cierran ni confirman
+        bool consumed = false;
+        bool tok = ed[0] || ed[1] || ed[2] || ed[3] || ed[6] || ed[7];
+        if (tok) {
+            char want = KONAMI[kprog];
+            bool hit = (want == 'U' && ed[2]) || (want == 'D' && ed[3]) || (want == 'L' && ed[0] && !ed[7]) || (want == 'R' && ed[1]) || (want == 'B' && ed[6]) || (want == 'A' && ed[7]);
+            if (hit) {
+                consumed = want == 'B' || want == 'A';
+                if (++kprog == 10) { kprog = 0; hv.view = HOME_VIEW_STAGE; hv.stage = 1; hv.msg[0] = 0; rt_log("[home] codigo Konami: selector de fases\n"); }
+            } else kprog = ed[2] ? 1 : 0;
+        }
+        if (!consumed) switch (hv.view) {
+        case HOME_VIEW_MAIN:
+            if (ed[0]) hv.sel = (hv.sel + HOME_N - 1) % HOME_N;
+            if (ed[1]) hv.sel = (hv.sel + 1) % HOME_N;
+            if (ed[5]) action = HOME_RESUME;
+            else if (ed[4]) {
+                if (hv.sel == HOME_SAVE) {
+                    if (game_can_save()) { hv.view = HOME_VIEW_SAVE; hv.slot = 0; hv.msg[0] = 0; home_refresh_slots(); }
+                    else msg("YOU CAN ONLY SAVE DURING A STAGE");
+                } else if (hv.sel == HOME_LOAD) { hv.view = HOME_VIEW_LOAD; hv.slot = 0; hv.msg[0] = 0; home_refresh_slots(); }
+                else action = hv.sel;
+            }
+            break;
+        case HOME_VIEW_SAVE: case HOME_VIEW_LOAD:
+            if (ed[0]) hv.slot = (hv.slot + SAVE_SLOTS - 1) % SAVE_SLOTS;
+            if (ed[1]) hv.slot = (hv.slot + 1) % SAVE_SLOTS;
+            if (ed[5]) { hv.view = HOME_VIEW_MAIN; hv.msg[0] = 0; }
+            else if (ed[4] && hv.view == HOME_VIEW_SAVE) {
+                bool ok = game_save_slot(hv.slot, gx_capture_thumb());
+                char b[64]; snprintf(b, sizeof b, ok ? "SAVED TO SLOT %d" : "COULD NOT SAVE TO SLOT %d", hv.slot + 1); msg(b);
+                home_refresh_slots();
+            } else if (ed[4]) {
+                SlotInfo si;
+                if (game_slot_read(hv.slot, si, nullptr)) action = 100 + hv.slot; else msg("EMPTY SLOT");
+            }
+            break;
+        case HOME_VIEW_STAGE:
+            if (ed[0]) hv.stage = hv.stage <= 1 ? 6 : hv.stage - 1;
+            if (ed[1]) hv.stage = hv.stage >= 6 ? 1 : hv.stage + 1;
+            if (ed[5]) { hv.view = HOME_VIEW_MAIN; hv.msg[0] = 0; }
+            else if (ed[4]) action = 200 + hv.stage;
+            break;
+        }
+        PresentInfo pi = base_present_info(); pi.home_open = action < 0; pi.home = hv;
+        if (action >= 100) { pi.home_open = false; pi.loading = true; }                 // ultimo fotograma antes de relanzar
+        g_pending_presents++;
+        rq_push([pi] { render_present(pi); g_pending_presents--; { std::lock_guard<std::mutex> lk(g_q_mtx); } g_q_room.notify_all(); });
+        rq_wait_presents(0);                                       // con vsync, el intercambio marca el ritmo
+        if (!g_set.vsync) SDL_Delay(16);
+    }
+    double dt = now_s() - t0; rt_time_skip(dt); audio_pause(false, dt);
+    g_input_hold = true;
+    rt_log("[home] accion %d\n", action);
+    if (action >= 200) game_start_stage(action - 200);
+    if (action >= 100) game_load_slot(action - 100);
+    if (action == HOME_SETTINGS) g_menu_open = true;
+    else if (action == HOME_RESET) rt_restart();
+    else if (action == HOME_QUIT) rt_quit("salir desde el menu HOME");
 }
 
 void gx_frame_present() {
@@ -782,9 +975,11 @@ void gx_frame_present() {
             static bool pv[8]; bool l, r, u, d; pad_dirs(l, r, u, d);
             bool now[8] = { pad_btn(SDL_CONTROLLER_BUTTON_GUIDE), u, d, l, r, pad_btn(SDL_CONTROLLER_BUTTON_A), pad_btn(SDL_CONTROLLER_BUTTON_B), false };
             bool e_[8]; for (int i = 0; i < 8; i++) { e_[i] = now[i] && !pv[i]; pv[i] = now[i]; }
-            if (e_[0]) f3 = true;
+            if (e_[0]) g_home_request = true;                  // boton central: menu HOME (F3 se abre desde el)
             if (g_menu_open) { up |= e_[1]; dn |= e_[2]; lf |= e_[3]; rt |= e_[4]; en |= e_[5]; es |= e_[6]; }
         }
+        extern bool g_wii_home;
+        if (edge(SDL_SCANCODE_H) && !g_wii_home && !g_menu_open) g_home_request = true;
         if (f3) g_menu_open = !g_menu_open;
         if (f4) { g_set.unlimited ^= 1; settings_apply(false); settings_save(); fprintf(stderr, "[rt] limite de 60 Hz %s\n", g_set.unlimited ? "DESACTIVADO" : "activado"); }
         if (g_menu_open) {
@@ -794,8 +989,20 @@ void gx_frame_present() {
             if (lf) menu_change(g_menu_sel, -1);
             if (rt || en) menu_change(g_menu_sel, 1);
         }
-        pi.set = g_set; pi.show_fps = g_show_fps; pi.menu_open = g_menu_open; pi.menu_sel = g_menu_sel; pi.frame = frame;
+        pi.set = g_set; pi.show_fps = g_show_fps; pi.menu_open = g_menu_open; pi.menu_sel = g_menu_sel; pi.frame = frame; pi.loading = game_autostart_active();
         snprintf(pi.fps_text, sizeof pi.fps_text, "FPS %d", shown);
+        g_last_fps_shown = shown;
+    }
+    {   // retrazado acompasado al monitor: con vsync y una pantalla de ~60 Hz (se revisa cada ~0,5 s: ajustes, cambio de pantalla)
+        static int chk = 0;
+        if (--chk <= 0) {
+            chk = 30;
+            int hz = 0; SDL_DisplayMode m; int di = SDL_GetWindowDisplayIndex(g_win);
+            if (di >= 0 && SDL_GetCurrentDisplayMode(di, &m) == 0) hz = m.refresh_rate;
+            static const bool force_timer = getenv("RT_VI_TIMER") != nullptr;
+            bool want = g_set.vsync && !g_vi_uncapped && !g_disp_sync_bad && !force_timer && hz >= 58 && hz <= 62;
+            if (want != g_disp_sync.load()) { g_disp_sync = want; rt_log("[vi] retrazado %s (pantalla %d Hz, vsync %s)\n", want ? "acompasado al monitor" : "por reloj (59,94 Hz)", hz, g_set.vsync ? "si" : "no"); }
+        }
     }
     g_pending_presents++;
     rq_push([pi] { render_present(pi); g_pending_presents--; { std::lock_guard<std::mutex> lk(g_q_mtx); } g_q_room.notify_all(); });
@@ -808,7 +1015,7 @@ void gx_frame_present() {
     static const char* test_pause = getenv("RT_TEST_PAUSE");            // prueba: RT_TEST_PAUSE=n simula perder el foco en el fotograma n
     if (test_pause && frame == atoi(test_pause)) { SDL_Event f; SDL_zero(f); f.type = SDL_WINDOWEVENT; f.window.event = SDL_WINDOWEVENT_FOCUS_LOST; SDL_PushEvent(&f); }
     while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) { fprintf(stderr, "[rt] ventana cerrada\n"); exit(0); }
+        if (e.type == SDL_QUIT) rt_quit("ventana cerrada");
         pad_event(e);
         if (e.type == SDL_WINDOWEVENT) {
             if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST || e.window.event == SDL_WINDOWEVENT_HIDDEN || e.window.event == SDL_WINDOWEVENT_MINIMIZED) lost = true;
@@ -821,12 +1028,15 @@ void gx_frame_present() {
         for (bool back = false; !back;) {
             if (test_pause && now_s() - t0 > 5.0) { SDL_Event f; SDL_zero(f); f.type = SDL_WINDOWEVENT; f.window.event = SDL_WINDOWEVENT_FOCUS_GAINED; SDL_PushEvent(&f); }
             if (!SDL_WaitEventTimeout(&e, 250)) continue;
-            if (e.type == SDL_QUIT) { fprintf(stderr, "[rt] ventana cerrada\n"); exit(0); }
+            if (e.type == SDL_QUIT) rt_quit("ventana cerrada");
             if (e.type == SDL_WINDOWEVENT && (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED || e.window.event == SDL_WINDOWEVENT_SHOWN || e.window.event == SDL_WINDOWEVENT_RESTORED)) back = true;
         }
         double dt = now_s() - t0; rt_time_skip(dt); audio_pause(false, dt);
         rq_push([] { g_filter_dirty = true; });
     }
+    static const char* test_home = getenv("RT_TEST_HOME");
+    if (test_home && frame == atoi(test_home)) g_home_request = true;
+    if (g_home_request) { g_home_request = false; if (!game_autostart_active()) home_menu_run(); }
 }
 
 void gx_render_stats() {
@@ -836,6 +1046,7 @@ void gx_render_stats() {
 
 // Teclado (Wii Remote en horizontal): flechas/WASD = cruceta girada, Z/1 = boton 1 (saltar), X/2 = boton 2 (atacar), C = A, V = B, Espacio/Intro = +, Backspace = -, H = HOME. Raton: puntero y clic izquierdo = A.
 u32 gx_input_buttons() {
+    if (game_autostart_active()) { static unsigned n = 0; n++; return ((n / 6) & 1) ? 0x0100u : 0u; }   // cargar / selector: "confirmar" hasta la partida
     // Pruebas sin teclado: RT_AUTO_SEQ="n:mascara[p],..." (lecturas de mando n; mascara en hex; p = pulsar 20 lecturas si / 20 no)
     if (const char* sq = getenv("RT_AUTO_SEQ")) {
         static unsigned n = 0; n++;
@@ -865,9 +1076,11 @@ u32 gx_input_buttons() {
     // Botones: Z / 1 = boton 1 (saltar), X / 2 = boton 2 (atacar, confirmar en los menus), C = A, V = B, Espacio/Intro = +, Retroceso = -, H = HOME
     if (k[SDL_SCANCODE_SPACE] || k[SDL_SCANCODE_RETURN]) h |= 0x0010;
     if (k[SDL_SCANCODE_X] || k[SDL_SCANCODE_2]) h |= 0x0100; if (k[SDL_SCANCODE_Z] || k[SDL_SCANCODE_1]) h |= 0x0200;
-    if (k[SDL_SCANCODE_V]) h |= 0x0400; if (k[SDL_SCANCODE_C]) h |= 0x0800; if (k[SDL_SCANCODE_BACKSPACE]) h |= 0x1000; if (k[SDL_SCANCODE_H]) h |= 0x8000;
+    extern bool g_wii_home;                    // H = menu HOME del port; solo con RT_WII_HOME (y el contenido compartido) llega HOME al juego
+    if (k[SDL_SCANCODE_V]) h |= 0x0400; if (k[SDL_SCANCODE_C]) h |= 0x0800; if (k[SDL_SCANCODE_BACKSPACE]) h |= 0x1000; if (k[SDL_SCANCODE_H] && g_wii_home) h |= 0x8000;
     h |= pad_hold(upright);
     u32 m = SDL_GetMouseState(nullptr, nullptr); if (m & SDL_BUTTON(SDL_BUTTON_LEFT)) h |= 0x0800; if (m & SDL_BUTTON(SDL_BUTTON_RIGHT)) h |= 0x0400;
+    if (g_input_hold) { if (h) return 0; g_input_hold = false; }   // Intro/2 de confirmar en el menu no deben llegar al juego
     return h;
 }
 void gx_input_pointer(float* x, float* y) {

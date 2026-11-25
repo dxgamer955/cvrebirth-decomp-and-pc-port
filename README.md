@@ -50,6 +50,7 @@ folder that contains `build.sh`, `build.bat` and `README.md`. The build script l
 2. Copy your `.wad` into the repository root.
 3. Open a terminal in the repository root and run `./build.sh`.
 4. Play: `cd runtime && ./build/castlevania ../orig/game.dol`
+5. Optional, an AppImage: `scripts/make_appimage.sh` (add `--embed-game` for a single self-contained file; see [BUILD.md](BUILD.md)).
 
 **Windows** (the build runs inside MSYS2, a free tool that provides the compiler)
 
@@ -62,6 +63,7 @@ folder that contains `build.sh`, `build.bat` and `README.md`. The build script l
    `build.bat --install-deps`. The first time it installs the compiler and libraries it needs (a few minutes), then builds the game.
    Next time you can just double-click `build.bat`.
 5. Play: double-click `runtime\play-windows.bat`.
+6. Optional, a portable folder + `.zip` that runs with a double click: `package-windows.bat --embed-game` (see [BUILD.md](BUILD.md)).
 
 If MSYS2 is installed in a folder other than `C:\msys64` (or another drive letter such as `D:\msys64`), set the `MSYS2_ROOT`
 environment variable to that folder before running `build.bat`.
@@ -164,6 +166,7 @@ que contiene `build.sh`, `build.bat` y `README.md`. El script de compilación lo
 2. Copia tu `.wad` a la raíz del repositorio.
 3. Abre una terminal en la raíz del repositorio y ejecuta `./build.sh`.
 4. Para jugar: `cd runtime && ./build/castlevania ../orig/game.dol`
+5. Opcional, un AppImage: `scripts/make_appimage.sh` (con `--embed-game`, un único archivo autosuficiente; ver [BUILD.md](BUILD.md)).
 
 **Windows** (la compilación se hace dentro de MSYS2, una herramienta gratuita que aporta el compilador)
 
@@ -176,6 +179,7 @@ que contiene `build.sh`, `build.bat` y `README.md`. El script de compilación lo
    En la ventana negra ejecuta `build.bat --install-deps`. La primera vez instala el compilador y las librerías necesarias (unos
    minutos) y después compila el juego. Las siguientes veces basta con hacer doble clic en `build.bat`.
 5. Para jugar: doble clic en `runtime\play-windows.bat`.
+6. Opcional, una carpeta portable + `.zip` que se abre con doble clic: `package-windows.bat --embed-game` (ver [BUILD.md](BUILD.md)).
 
 Si MSYS2 está instalado en otra carpeta distinta de `C:\msys64` (u otra letra de unidad, como `D:\msys64`), define la variable de
 entorno `MSYS2_ROOT` con esa carpeta antes de ejecutar `build.bat`.
